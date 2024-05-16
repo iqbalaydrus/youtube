@@ -1,0 +1,4 @@
+pandas==2.2.2
+polars[all]==0.20.26
+duckdb==0.10.2
+psrecord[plot]==1.4
