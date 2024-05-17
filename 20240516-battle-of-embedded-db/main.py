@@ -21,7 +21,7 @@ def main():
     )
     parser.add_argument(
         "--stage",
-        choices=["load"],
+        choices=["load", "process"],
         required=True,
     )
     args = parser.parse_args()
@@ -31,6 +31,10 @@ def main():
             from cases import c_duckdb as engine
 
             start = engine.load_dataset(start, dataset_path)
+        elif args.stage == "process":
+            from cases import c_duckdb as engine
+
+            start = engine.process_dataset(start)
         else:
             raise ValueError(f"Unknown stage: {args.stage}")
     elif args.engine == "sqlite":
@@ -38,6 +42,10 @@ def main():
             from cases import c_sqlite as engine
 
             start = engine.load_dataset(start, dataset_path)
+        elif args.stage == "process":
+            from cases import c_sqlite as engine
+
+            start = engine.process_dataset(start)
         else:
             raise ValueError(f"Unknown stage: {args.stage}")
     elif args.engine == "pandas":
@@ -45,6 +53,10 @@ def main():
             from cases import c_pandas as engine
 
             start = engine.load_dataset(start, dataset_path)
+        elif args.stage == "process":
+            from cases import c_pandas as engine
+
+            start = engine.process_dataset(start)
         else:
             raise ValueError(f"Unknown stage: {args.stage}")
     elif args.engine == "polars":
@@ -52,6 +64,10 @@ def main():
             from cases import c_polars as engine
 
             start = engine.load_dataset(start, dataset_path)
+        elif args.stage == "process":
+            from cases import c_polars as engine
+
+            start = engine.process_dataset(start)
         else:
             raise ValueError(f"Unknown stage: {args.stage}")
     else:
