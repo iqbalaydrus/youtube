@@ -37,7 +37,8 @@ def process_dataset(start: float) -> float:
            max(temperature) as temperature_max,
            min(temperature) as temperature_min 
     FROM dataset
-    GROUP BY location""",
+    GROUP BY location
+    ORDER BY location""",
         "sqlite://dataset.sqlite",
     )
     logger.info(f"dumping output. elapsed: {time.time() - start}")

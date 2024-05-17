@@ -12,6 +12,7 @@ logger.addHandler(handler)
 
 def main():
     logger.info("starting")
+    total_start = time.time()
     start = time.time()
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -72,7 +73,9 @@ def main():
             raise ValueError(f"Unknown stage: {args.stage}")
     else:
         raise ValueError(f"Unknown engine {args.engine}")
-    logger.info(f"exit. elapsed={time.time() - start}")
+    logger.info(
+        f"exit. elapsed={time.time() - start} total={time.time() - total_start}"
+    )
 
 
 if __name__ == "__main__":

@@ -29,10 +29,14 @@ def process_dataset(start: float) -> float:
     df = pd.read_parquet("dataset_pd.parquet")
     logger.info(f"processing dataset. elapsed: {time.time() - start}")
     start = time.time()
-    df = df.groupby(["location"]).agg(
-        temperature_mean=pd.NamedAgg(column="temperature", aggfunc="mean"),
-        temperature_max=pd.NamedAgg(column="temperature", aggfunc="max"),
-        temperature_min=pd.NamedAgg(column="temperature", aggfunc="min"),
+    df = (
+        df.groupby(["location"])
+        .agg(
+            temperature_mean=pd.NamedAgg(column="temperature", aggfunc="mean"),
+            temperature_max=pd.NamedAgg(column="temperature", aggfunc="max"),
+            temperature_min=pd.NamedAgg(column="temperature", aggfunc="min"),
+        )
+        .sort_values(by=["location"])
     )
     logger.info(f"dumping output. elapsed: {time.time() - start}")
     start = time.time()

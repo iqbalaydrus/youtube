@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-rm -f dataset.sqlite* dataset.duckdb* dataset_*.parquet result_*.parquet
+rm -f dataset.sqlite* dataset.duckdb* dataset_*.parquet result_*.parquet plot-*-load.png plot-*-process.png
 psrecord 'python main.py --engine duckdb --stage load' --include-children --plot plot-duckdb-load.png
 psrecord 'python main.py --engine sqlite --stage load' --include-children --plot plot-sqlite-load.png
 psrecord 'python main.py --engine polars --stage load' --include-children --plot plot-polars-load.png

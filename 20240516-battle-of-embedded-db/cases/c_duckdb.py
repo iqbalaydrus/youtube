@@ -44,7 +44,8 @@ def process_dataset(start: float) -> float:
            max(temperature) as temperature_max,
            min(temperature) as temperature_min 
     FROM dataset
-    GROUP BY location 
+    GROUP BY location
+    ORDER BY location
     ) TO 'result_dk.parquet' (FORMAT PARQUET)"""
     )
     con.close()
