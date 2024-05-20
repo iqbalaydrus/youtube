@@ -1,0 +1,45 @@
+Starting up command 'python main.py --engine duckdb --stage load' and attaching to process
+2024-05-18 11:38:00,008 starting
+2024-05-18 11:38:00,172 reading csv. elapsed=0.1631450653076172
+2024-05-18 11:38:07,210 dumping output. elapsed=7.037874937057495
+2024-05-18 11:38:07,245 exit. elapsed=0.03493499755859375 total=7.236227989196777
+Starting up command 'python main.py --engine sqlite --stage load' and attaching to process
+2024-05-18 11:38:08,177 starting
+2024-05-18 11:38:08,304 reading csv. elapsed=0.12662792205810547
+2024-05-18 11:38:59,427 dumping output. elapsed=51.12271189689636
+2024-05-18 11:40:00,516 exit. elapsed=61.08788585662842 total=112.33850288391113
+Process finished (112.38 seconds)
+Starting up command 'python main.py --engine polars --stage load' and attaching to process
+2024-05-18 11:40:01,083 starting
+2024-05-18 11:40:01,165 reading csv. elapsed=0.08166909217834473
+2024-05-18 11:40:02,242 dumping output. elapsed: 1.0777587890625
+2024-05-18 11:40:07,954 exit. elapsed=5.711789608001709 total=6.87138819694519
+Process finished (6.91 seconds)
+Starting up command 'python main.py --engine pandas --stage load' and attaching to process
+2024-05-18 11:40:08,413 starting
+2024-05-18 11:40:08,852 reading csv. elapsed=0.43912720680236816
+2024-05-18 11:40:12,361 dumping output. elapsed=3.508500099182129
+2024-05-18 11:40:19,442 exit. elapsed=7.080600023269653 total=11.028377056121826
+Starting up command 'python main.py --engine duckdb --stage process' and attaching to process
+2024-05-18 11:40:19,949 starting
+2024-05-18 11:40:20,013 reading dataset. elapsed=0.06379175186157227
+2024-05-18 11:40:20,018 processing dataset. elapsed: 0.004867076873779297
+2024-05-18 11:40:20,468 exit. elapsed=0.4498722553253174 total=0.5186507701873779
+Starting up command 'python main.py --engine sqlite --stage process' and attaching to process
+2024-05-18 11:40:20,902 starting
+2024-05-18 11:40:20,960 processing dataset. elapsed: 0.057624101638793945
+2024-05-18 11:41:35,035 dumping output. elapsed: 74.07447910308838
+2024-05-18 11:41:35,037 exit. elapsed=0.0023331642150878906 total=74.13457798957825
+Process finished (74.18 seconds)
+Starting up command 'python main.py --engine polars --stage process' and attaching to process
+2024-05-18 11:41:35,479 starting
+2024-05-18 11:41:35,532 reading dataset. elapsed=0.052629947662353516
+2024-05-18 11:41:36,259 processing dataset. elapsed: 0.7271852493286133
+2024-05-18 11:41:38,060 dumping output. elapsed: 1.800483226776123
+2024-05-18 11:41:38,063 exit. elapsed=0.0028657913208007812 total=2.583508014678955
+Starting up command 'python main.py --engine pandas --stage process' and attaching to process
+2024-05-18 11:41:38,469 starting
+2024-05-18 11:41:38,882 reading dataset. elapsed=0.4135909080505371
+2024-05-18 11:41:42,140 processing dataset. elapsed: 3.257862091064453
+2024-05-18 11:41:45,979 dumping output. elapsed: 3.838474988937378
+2024-05-18 11:41:45,981 exit. elapsed=0.0021791458129882812 total=7.51233983039856
