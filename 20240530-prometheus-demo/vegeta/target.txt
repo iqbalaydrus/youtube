@@ -1,0 +1,11 @@
+POST http://127.0.0.1:8877/user/register
+@vegeta/payload.json
+
+GET http://127.0.0.1:8877/article
+Prom-Demo-User-Id: 3
+
+GET http://127.0.0.1:8877/article
+Prom-Demo-User-Id: 3
+
+GET http://127.0.0.1:8877/article
+Prom-Demo-User-Id: 2

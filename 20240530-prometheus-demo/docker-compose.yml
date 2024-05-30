@@ -1,0 +1,48 @@
+services:
+  prom-demo:
+    restart: always
+    build:
+      context: src/prom-demo
+    ports:
+      - 8877:8080
+  postgres:
+    image: postgres:16.3
+    restart: always
+    volumes:
+      - ./docker-volume/postgres/init:/docker-entrypoint-initdb.d
+      - ./docker-volume/postgres/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: grafana
+      POSTGRES_PASSWORD: ii2eejaesahGheiJ
+      PGDATA: /var/lib/postgresql/data/pgdata
+  postgres-exporter:
+    image: bitnami/postgres-exporter:0.15.0
+    restart: always
+    environment:
+      DATA_SOURCE_NAME: postgresql://grafana:ii2eejaesahGheiJ@postgres:5432/postgres?sslmode=disable
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    restart: always
+    ports:
+      - 8879:9090
+    volumes:
+      - ./docker-volume/prometheus/data:/prometheus
+      - ./docker-volume/prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml
+  grafana:
+    image: grafana/grafana:11.0.0
+    restart: always
+    ports:
+      - 8878:3000
+    environment:
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_HOST: postgres:5432
+      GF_DATABASE_NAME: grafana
+      GF_DATABASE_USER: grafana
+      GF_DATABASE_PASSWORD: ii2eejaesahGheiJ
+      # DO NOT use these 4 env var in production
+      # it will disable all logins and everyone can mess with your dashboards
+      # without any form of authentications
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ORG_ROLE: Editor
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
