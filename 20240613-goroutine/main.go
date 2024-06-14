@@ -2,12 +2,14 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"runtime"
 	"sort"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -21,32 +23,36 @@ type Value struct {
 	Min   float32
 }
 
-func splitLine(line string) (LineSplit, error) {
+func splitLine(line []byte) (LineSplit, error) {
 	// we don't use csv parser since no special characters exists to save computation power
-	lineSplit := strings.SplitN(line, ";", 2)
-	if len(lineSplit) < 2 {
+	station, temperature, found := bytes.Cut(line, []byte(";"))
+	if !found {
 		return LineSplit{}, fmt.Errorf("invalid line: %s", line)
 	} else {
-		return LineSplit{lineSplit[0], lineSplit[1]}, nil
+		return LineSplit{station, temperature}, nil
 	}
 }
 
 type LineSplit struct {
-	Station     string
-	Temperature string
+	Station     []byte
+	Temperature []byte
 }
 
 func decodeLine(lineSplit LineSplit, result map[string]*Value) error {
-	elm := result[lineSplit.Station]
+	station := string(lineSplit.Station)
+	elm := result[station]
 	if elm == nil {
 		elm = new(Value)
 		// temperature value is between -99.9 .. 99.9
 		elm.Max = -100
 		elm.Min = 100
-		elm.Station = lineSplit.Station
-		result[lineSplit.Station] = elm
+		elm.Station = station
+		result[station] = elm
 	}
-	value, err := strconv.ParseFloat(lineSplit.Temperature, 32)
+	value, err := strconv.ParseFloat(
+		string(lineSplit.Temperature),
+		32,
+	)
 	if err != nil {
 		return err
 	}
@@ -62,7 +68,11 @@ func decodeLine(lineSplit LineSplit, result map[string]*Value) error {
 	return nil
 }
 
-func SplitWorker(wg *sync.WaitGroup, lineChannel <-chan string, decodeChannel chan<- LineSplit) {
+func SplitWorker(
+	wg *sync.WaitGroup,
+	lineChannel <-chan []byte,
+	decodeChannel chan<- LineSplit,
+) {
 	defer wg.Done()
 	for line := range lineChannel {
 		lineSplit, err := splitLine(line)
@@ -74,7 +84,11 @@ func SplitWorker(wg *sync.WaitGroup, lineChannel <-chan string, decodeChannel ch
 	}
 }
 
-func DecodeWorker(wg *sync.WaitGroup, decodeChannel <-chan LineSplit, result map[string]*Value) {
+func DecodeWorker(
+	wg *sync.WaitGroup,
+	decodeChannel <-chan LineSplit,
+	result map[string]*Value,
+) {
 	defer wg.Done()
 	for line := range decodeChannel {
 		err := decodeLine(line, result)
@@ -84,25 +98,84 @@ func DecodeWorker(wg *sync.WaitGroup, decodeChannel <-chan LineSplit, result map
 	}
 }
 
-func main() {
-	start := time.Now()
+// FileWorker might have a bug, some lines might be skipped,
+// and some lines might be processed twice, not thoroughly tested
+func FileWorker(
+	wg *sync.WaitGroup,
+	start, stop int64,
+	lineChannel chan<- []byte,
+) {
+	defer wg.Done()
 	f, err := os.Open("measurements.txt")
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
-	// 64k buffer by default
-	// in the github page, max line will be 100 bytes for station, 1 byte separator, and 5 bytes temperature
-	const maxCapacity = 128 // round capacity to 128 bytes per line
-	scanner := bufio.NewScanner(f)
-	buf := make([]byte, maxCapacity)
-	scanner.Buffer(buf, maxCapacity)
-	decodeWg := new(sync.WaitGroup)
+	r := bufio.NewReader(f)
+	if start > 0 {
+		_, err = f.Seek(start-int64(len("\n")), io.SeekStart)
+		if err != nil {
+			panic(err)
+		}
+		r.Reset(f)
+		newline := make([]byte, len("\n"))
+		_, err = r.Read(newline)
+		if err != nil {
+			panic(err)
+		}
+		if string(newline) != "\n" {
+			line, err := r.ReadBytes('\n')
+			if err != nil {
+				panic(err)
+			}
+			start += int64(len(line))
+		}
+	}
+	for {
+		if start >= stop {
+			break
+		}
+		line, err := r.ReadBytes('\n')
+		if len(line) > 0 {
+			start += int64(len(line))
+			lineChannel <- bytes.TrimRight(line, "\n")
+		}
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func main() {
+	start := time.Now()
+	fStat, err := os.Stat("measurements.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	fileWg := new(sync.WaitGroup)
 	splitWg := new(sync.WaitGroup)
-	lineChannel := make(chan string, 100)
+	decodeWg := new(sync.WaitGroup)
+	lineChannel := make(chan []byte, 100)
 	decodeChannel := make(chan LineSplit, 100)
-	result := make(map[string]*Value)
+	mergedResult := make(map[string]*Value)
 	var workerResult []map[string]*Value
+
+	var prevOffset int64
+	for i := 0; i < runtime.NumCPU(); i++ {
+		fileWg.Add(1)
+		nextOffset := prevOffset + int64(
+			float64(1)/float64(runtime.NumCPU())*float64(fStat.Size()),
+		)
+		if i+1 == runtime.NumCPU() {
+			nextOffset = fStat.Size()
+		}
+		go FileWorker(fileWg, prevOffset, nextOffset, lineChannel)
+		prevOffset = nextOffset
+	}
 	for i := 0; i < runtime.NumCPU(); i++ {
 		splitWg.Add(1)
 		go SplitWorker(splitWg, lineChannel, decodeChannel)
@@ -114,14 +187,7 @@ func main() {
 		go DecodeWorker(decodeWg, decodeChannel, decodeResult)
 	}
 
-	// room for optimization
-	for scanner.Scan() {
-		lineChannel <- scanner.Text()
-	}
-	if err := scanner.Err(); err != nil {
-		panic(err)
-	}
-
+	fileWg.Wait()
 	close(lineChannel)
 	splitWg.Wait()
 	close(decodeChannel)
@@ -130,8 +196,8 @@ func main() {
 
 	for _, decodeResult := range workerResult {
 		for k, v := range decodeResult {
-			if resultV := result[k]; resultV == nil {
-				result[k] = v
+			if resultV := mergedResult[k]; resultV == nil {
+				mergedResult[k] = v
 			} else {
 				resultV.Sum += v.Sum
 				resultV.Count += v.Count
@@ -145,7 +211,7 @@ func main() {
 		}
 	}
 	var resultList []*Value
-	for _, value := range result {
+	for _, value := range mergedResult {
 		resultList = append(resultList, value)
 	}
 	mergeTime := time.Now()
@@ -159,15 +225,37 @@ func main() {
 		panic(err)
 	}
 	for _, value := range resultList {
-		_, err = output.WriteString(fmt.Sprintf("%s;%f;%f;%f\n", value.Station, value.Sum/float32(value.Count), value.Min, value.Max))
+		_, err = output.WriteString(
+			fmt.Sprintf(
+				"%s;%f;%f;%f\n",
+				value.Station,
+				value.Sum/float32(value.Count),
+				value.Min,
+				value.Max,
+			))
 		if err != nil {
 			panic(err)
 		}
 	}
 	outputTime := time.Now()
-	fmt.Println(fmt.Sprintf("processing time: %.3f", processTime.Sub(start).Seconds()))
-	fmt.Println(fmt.Sprintf("merge time: %.3f", mergeTime.Sub(processTime).Seconds()))
-	fmt.Println(fmt.Sprintf("sort time: %.3f", sortTime.Sub(mergeTime).Seconds()))
-	fmt.Println(fmt.Sprintf("dump time: %.3f", outputTime.Sub(sortTime).Seconds()))
-	fmt.Println(fmt.Sprintf("total time: %.3f", outputTime.Sub(start).Seconds()))
+	fmt.Println(fmt.Sprintf(
+		"processing time: %.3f",
+		processTime.Sub(start).Seconds(),
+	))
+	fmt.Println(fmt.Sprintf(
+		"merge time: %.3f",
+		mergeTime.Sub(processTime).Seconds(),
+	))
+	fmt.Println(fmt.Sprintf(
+		"sort time: %.3f",
+		sortTime.Sub(mergeTime).Seconds(),
+	))
+	fmt.Println(fmt.Sprintf(
+		"dump time: %.3f",
+		outputTime.Sub(sortTime).Seconds(),
+	))
+	fmt.Println(fmt.Sprintf(
+		"total time: %.3f",
+		outputTime.Sub(start).Seconds(),
+	))
 }
