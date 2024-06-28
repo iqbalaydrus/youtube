@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"runtime"
 	"sort"
 	"strconv"
 	"sync"
@@ -159,28 +158,31 @@ func main() {
 	fileWg := new(sync.WaitGroup)
 	splitWg := new(sync.WaitGroup)
 	decodeWg := new(sync.WaitGroup)
-	lineChannel := make(chan []byte, 100)
-	decodeChannel := make(chan LineSplit, 100)
+	lineChannel := make(chan []byte, 10000)
+	decodeChannel := make(chan LineSplit, 10000)
 	mergedResult := make(map[string]*Value)
 	var workerResult []map[string]*Value
 
 	var prevOffset int64
-	for i := 0; i < runtime.NumCPU(); i++ {
+	fileWorkers := 1
+	for i := 0; i < fileWorkers; i++ {
 		fileWg.Add(1)
 		nextOffset := prevOffset + int64(
-			float64(1)/float64(runtime.NumCPU())*float64(fStat.Size()),
+			float64(1)/float64(fileWorkers)*float64(fStat.Size()),
 		)
-		if i+1 == runtime.NumCPU() {
+		if i+1 == fileWorkers {
 			nextOffset = fStat.Size()
 		}
 		go FileWorker(fileWg, prevOffset, nextOffset, lineChannel)
 		prevOffset = nextOffset
 	}
-	for i := 0; i < runtime.NumCPU(); i++ {
+	splitWorkers := 1
+	for i := 0; i < splitWorkers; i++ {
 		splitWg.Add(1)
 		go SplitWorker(splitWg, lineChannel, decodeChannel)
 	}
-	for i := 0; i < runtime.NumCPU(); i++ {
+	decodeWorkers := 1
+	for i := 0; i < decodeWorkers; i++ {
 		decodeWg.Add(1)
 		decodeResult := make(map[string]*Value)
 		workerResult = append(workerResult, decodeResult)
