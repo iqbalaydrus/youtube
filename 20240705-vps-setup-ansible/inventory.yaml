@@ -1,0 +1,11 @@
+all:
+  vars:
+    volume_path: "/home/{{ ansible_env.SUDO_USER or ansible_user_id }}/docker_volume"
+    pg_postgres_password: ""
+    pg_grafana_password: ""
+    gf_admin_password: ""
+  hosts:
+    yt-vps-setup.iqbalaydrus.com:
+      ansible_user: root
+      ansible_port: 10123
+      ansible_ssh_pass: "{{ lookup('ansible.builtin.env', 'SSHPASSWORD') }}"

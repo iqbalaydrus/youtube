@@ -1,0 +1,27 @@
+- name: Run Postgres
+  hosts: all
+  become: true
+  tasks:
+    - name: Create docker network
+      docker_network:
+        name: demo-net
+    - name: Postgres volume dir
+      file:
+        path: "{{ volume_path }}/postgres"
+        state: directory
+        owner: "999"
+        group: "999"
+    - name: Postgres Container
+      docker_container:
+        name: postgres
+        image: postgres:16.3
+        restart_policy: always
+        networks:
+          - name: demo-net
+        volumes:
+          - "{{ volume_path }}/postgres:/var/lib/postgresql/data"
+        published_ports:
+          - 127.0.0.1:5432:5432
+        env:
+          TZ: Asia/Jakarta
+          POSTGRES_PASSWORD: "{{ pg_postgres_password }}"

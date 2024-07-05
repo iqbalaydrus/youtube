@@ -1,0 +1,31 @@
+- name: Run Traefik
+  hosts: all
+  become: true
+  tasks:
+    - name: Create docker network
+      docker_network:
+        name: demo-net
+    - name: Traefik Container
+      docker_container:
+        name: traefik
+        image: traefik:v3.0.4
+        restart_policy: always
+        published_ports:
+          - 80:80
+          - 443:443
+        networks:
+          - name: demo-net
+        volumes:
+          - "/var/run/docker.sock:/var/run/docker.sock:ro"
+          - "{{ volume_path }}/traefik/letsencrypt:/letsencrypt"
+        env:
+          TZ: Asia/Jakarta
+        command:
+          - "--providers.docker=true"
+          - "--providers.docker.exposedbydefault=false"
+          - "--entryPoints.web.address=:80"
+          - "--entryPoints.websecure.address=:443"
+          - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+          - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+          - "--certificatesresolvers.letsencrypt.acme.email=m.iqbal.alaydrus@gmail.com"
+          - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"

@@ -1,0 +1,24 @@
+- name: Create User With sudo
+  hosts: all
+  become: true
+  vars:
+    new_user_name: "{{ lookup('ansible.builtin.env', 'USER', default=Undefined) }}"
+    new_user_ssh_key: "{{ lookup('ansible.builtin.env', 'USER_SSH_KEY', default=Undefined) }}"
+  tasks:
+    - name: Add user
+      user:
+        append: yes
+        shell: "/bin/bash"
+        name: "{{ new_user_name }}"
+        # disable password, only use ssh key, check ansible documentation on this
+        password: "!"
+    - name: Add ssh key
+      when: new_user_ssh_key is defined
+      authorized_key:
+        key: "{{ new_user_ssh_key }}"
+        user: "{{ new_user_name }}"
+    - name: Add user to sudoers
+      copy:
+        content: '{{ new_user_name }} ALL=(ALL) NOPASSWD:ALL'
+        dest: "/etc/sudoers.d/{{ new_user_name }}"
+        mode: 0440

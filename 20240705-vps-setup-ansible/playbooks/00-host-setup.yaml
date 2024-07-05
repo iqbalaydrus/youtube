@@ -1,0 +1,32 @@
+- name: Host initial setup
+  hosts: all
+  become: true
+  tasks:
+    - name: Setting timezone
+      timezone:
+        name: Asia/Jakarta
+    - name: Install requirements
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - chrony
+          - rsync
+          - net-tools
+          - iotop
+          - sysstat
+        state: present
+        update_cache: true
+    - name: Force ntp sync
+      shell:
+        cmd: "chronyc -a makestep"
+    - name: Disable swap partition
+      shell:
+        cmd: "swapoff -a"
+    - name: Disable swap partition permanently
+      lineinfile:
+        path: /etc/fstab
+        regexp: ".*vg-swap.*swap.*sw.*"
+        state: absent

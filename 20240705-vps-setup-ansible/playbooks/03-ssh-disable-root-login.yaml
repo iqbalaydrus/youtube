@@ -1,0 +1,16 @@
+- name: Disable root Login via SSH
+  hosts: all
+  become: true
+  tasks:
+    - name: Disable root login
+      register: sshd_config
+      lineinfile:
+        path: "/etc/ssh/sshd_config"
+        regexp: "^PermitRootLogin "
+        line: "PermitRootLogin no"
+    - name: Reload sshd
+      systemd:
+        name: sshd
+        enabled: true
+        state: reloaded
+      when: sshd_config is changed
