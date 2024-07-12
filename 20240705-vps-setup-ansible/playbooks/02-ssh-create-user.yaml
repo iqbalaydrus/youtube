@@ -7,7 +7,6 @@
   tasks:
     - name: Add user
       user:
-        append: yes
         shell: "/bin/bash"
         name: "{{ new_user_name }}"
         # disable password, only use ssh key, check ansible documentation on this

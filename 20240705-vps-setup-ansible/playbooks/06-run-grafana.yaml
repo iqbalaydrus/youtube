@@ -2,9 +2,12 @@
   hosts: all
   become: true
   tasks:
-    - name: Create docker network
+    - name: Create postgres network
       docker_network:
-        name: demo-net
+        name: postgres-net
+    - name: Create grafana network
+      docker_network:
+        name: grafana-net
     - name: Create Grafana Database
       postgresql_db:
         name: grafana
@@ -55,7 +58,8 @@
         image: grafana/grafana:11.1.0
         restart_policy: always
         networks:
-          - name: demo-net
+          - name: postgres-net
+          - name: grafana-net
         volumes:
           - "{{ volume_path }}/grafana:/var/lib/grafana"
         env:
@@ -65,11 +69,11 @@
           GF_DATABASE_NAME: grafana
           GF_DATABASE_USER: grafana
           GF_DATABASE_PASSWORD: "{{ pg_grafana_password }}"
-          GF_DATABASE_SSL_MODE: require
+          GF_DATABASE_SSL_MODE: disable
           GF_SECURITY_ADMIN_USER: admin
           GF_SECURITY_ADMIN_PASSWORD: "{{ gf_admin_password }}"
         labels:
           "traefik.enable": "true"
-          "traefik.http.routers.grafana.rule": "Host(`yt-vps-setup.iqbalaydrus.com`)"
+          "traefik.http.routers.grafana.rule": "Host(`{{ inventory_hostname }}`)"
           "traefik.http.routers.grafana.entrypoints": "websecure"
           "traefik.http.routers.grafana.tls.certresolver": "letsencrypt"

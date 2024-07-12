@@ -5,6 +5,9 @@
     - name: Setting timezone
       timezone:
         name: Asia/Jakarta
+    - name: Setting hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
     - name: Install requirements
       apt:
         name:
@@ -17,6 +20,7 @@
           - net-tools
           - iotop
           - sysstat
+          - python3-psycopg2
         state: present
         update_cache: true
     - name: Force ntp sync
@@ -26,7 +30,8 @@
       shell:
         cmd: "swapoff -a"
     - name: Disable swap partition permanently
+      # different setup may have different fstab entry
       lineinfile:
         path: /etc/fstab
-        regexp: ".*vg-swap.*swap.*sw.*"
+        regexp: '.*swap\s+sw\s+.*'
         state: absent

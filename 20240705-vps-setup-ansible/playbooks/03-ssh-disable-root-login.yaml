@@ -8,9 +8,9 @@
         path: "/etc/ssh/sshd_config"
         regexp: "^PermitRootLogin "
         line: "PermitRootLogin no"
-    - name: Reload sshd
+    - name: Reload ssh
       systemd:
-        name: sshd
+        name: ssh
         enabled: true
         state: reloaded
       when: sshd_config is changed

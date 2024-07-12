@@ -5,7 +5,7 @@ all:
     pg_grafana_password: ""
     gf_admin_password: ""
   hosts:
-    yt-vps-setup.iqbalaydrus.com:
+    yt-vps-demo.iqbalaydrus.com:
       ansible_user: root
       ansible_port: 10123
       ansible_ssh_pass: "{{ lookup('ansible.builtin.env', 'SSHPASSWORD') }}"

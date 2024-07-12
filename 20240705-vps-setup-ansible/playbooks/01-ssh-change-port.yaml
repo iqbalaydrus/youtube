@@ -8,9 +8,9 @@
         path: "/etc/ssh/sshd_config"
         regexp: "^Port "
         line: "Port 10123"
-    - name: Restart sshd
+    - name: Restart ssh
       systemd:
-        name: sshd
+        name: ssh
         enabled: true
         state: restarted
       when: sshd_config is changed

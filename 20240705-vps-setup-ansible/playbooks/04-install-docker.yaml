@@ -1,6 +1,13 @@
 - name: Install Docker
   hosts: all
   become: true
+  vars:
+    deb_arch:
+      "armv6l": "armhf"
+      "armv7l": "armhf"
+      "aarch64": "arm64"
+      "x86_64": "amd64"
+      "i386": "i386"
   tasks:
     - name: Install requirements
       ansible.builtin.apt:
@@ -18,8 +25,8 @@
     - name: Add repository into sources list
       ansible.builtin.apt_repository:
         repo: >-
-          deb [arch={{ ansible_architecture }}] https://download.docker.com/linux/{{ ansible_distribution | lower }}
-          {{ ansible_distribution_release }} stable
+          deb [arch={{ deb_arch[ansible_architecture] }}] https://download.docker.com/linux/{{ ansible_distribution | lower }}
+          {{ ansible_lsb.codename }} stable
         state: present
         filename: docker
     - name: Install Docker and everything else
@@ -37,4 +44,3 @@
         name: "{{ ansible_env.SUDO_USER or ansible_user_id }}"
         groups: docker
         append: true
-      register: docker_daemon
