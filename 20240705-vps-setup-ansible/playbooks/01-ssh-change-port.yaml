@@ -1,0 +1,16 @@
+- name: Change SSH Port to Non-Default
+  hosts: all
+  become: true
+  tasks:
+    - name: Change port
+      register: sshd_config
+      lineinfile:
+        path: "/etc/ssh/sshd_config"
+        regexp: "^Port "
+        line: "Port 10123"
+    - name: Restart ssh
+      systemd:
+        name: ssh
+        enabled: true
+        state: restarted
+      when: sshd_config is changed

@@ -1,0 +1,79 @@
+- name: Run Grafana
+  hosts: all
+  become: true
+  tasks:
+    - name: Create postgres network
+      docker_network:
+        name: postgres-net
+    - name: Create grafana network
+      docker_network:
+        name: grafana-net
+    - name: Create Grafana Database
+      postgresql_db:
+        name: grafana
+        login_host: 127.0.0.1
+        port: 5432
+        login_password: "{{ pg_postgres_password }}"
+        login_user: postgres
+        maintenance_db: postgres
+    - name: Create Grafana Database User
+      postgresql_user:
+        db: grafana
+        name: grafana
+        password: "{{ pg_grafana_password }}"
+        login_host: 127.0.0.1
+        port: 5432
+        login_password: "{{ pg_postgres_password }}"
+        login_user: postgres
+    - name: Set Grafana Database Privilege
+      postgresql_privs:
+        db: grafana
+        privs: ALL
+        type: database
+        objs: grafana
+        roles: grafana
+        login_host: 127.0.0.1
+        port: 5432
+        login_password: "{{ pg_postgres_password }}"
+        login_user: postgres
+    - name: Set Grafana Database Owner
+      postgresql_owner:
+        db: grafana
+        new_owner: grafana
+        obj_name: grafana
+        obj_type: database
+        login_host: 127.0.0.1
+        port: 5432
+        login_password: "{{ pg_postgres_password }}"
+        login_user: postgres
+    - name: Grafana Volume Dir
+      file:
+        path: "{{ volume_path }}/grafana"
+        state: directory
+        owner: "472"
+        group: root
+    - name: Grafana Container
+      docker_container:
+        name: grafana
+        image: grafana/grafana:11.1.0
+        restart_policy: always
+        networks:
+          - name: postgres-net
+          - name: grafana-net
+        volumes:
+          - "{{ volume_path }}/grafana:/var/lib/grafana"
+        env:
+          TZ: Asia/Jakarta
+          GF_DATABASE_TYPE: postgres
+          GF_DATABASE_HOST: "postgres:5432"
+          GF_DATABASE_NAME: grafana
+          GF_DATABASE_USER: grafana
+          GF_DATABASE_PASSWORD: "{{ pg_grafana_password }}"
+          GF_DATABASE_SSL_MODE: disable
+          GF_SECURITY_ADMIN_USER: admin
+          GF_SECURITY_ADMIN_PASSWORD: "{{ gf_admin_password }}"
+        labels:
+          "traefik.enable": "true"
+          "traefik.http.routers.grafana.rule": "Host(`{{ inventory_hostname }}`)"
+          "traefik.http.routers.grafana.entrypoints": "websecure"
+          "traefik.http.routers.grafana.tls.certresolver": "letsencrypt"
