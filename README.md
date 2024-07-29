@@ -1,2 +1,2 @@
 # youtube
-Repositories for iqbal's [youtube](https://youtube.com/@iqbal.alaydrus)
+Repositories for iqbal's [youtube](https://youtube.com/@iqbalaydrus)
