@@ -1,0 +1,17 @@
+syntax = "proto3";
+option go_package = "yt_msg_format/pbuf";
+
+message Employee {
+  string name = 1;
+  string position = 2;
+}
+
+message Result {
+  Employee employee = 1;
+  repeated uint64 scores = 2;
+}
+
+message Message {
+  string message = 1;
+  repeated Result result = 2;
+}
