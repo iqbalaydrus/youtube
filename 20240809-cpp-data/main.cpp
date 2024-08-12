@@ -36,18 +36,17 @@ int main() {
                     .temp_max = temperature_num,
                 };
             } else {
-                loc_data[location].count++;
-                loc_data[location].total += temperature_num;
-                if (loc_data[location].temp_max < temperature_num) {
-                    loc_data[location].temp_max = temperature_num;
+                auto loc_value = loc_data.at(location);
+                loc_value.count++;
+                loc_value.total += temperature_num;
+                if (loc_value.temp_max < temperature_num) {
+                    loc_value.temp_max = temperature_num;
                 }
-                if (loc_data[location].temp_min > temperature_num) {
-                    loc_data[location].temp_min = temperature_num;
+                if (loc_value.temp_min > temperature_num) {
+                    loc_value.temp_min = temperature_num;
                 }
+                loc_data[location] = loc_value;
             }
-//            if (3 == i) {
-//                break;
-//            }
         }
         file.close();
     }
