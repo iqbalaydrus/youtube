@@ -81,7 +81,7 @@ void process_line(Thread &t) {
 
 int main_mmap() {
     auto start = std::chrono::system_clock::now();
-    constexpr int thread_count = 1;
+    constexpr int thread_count = 22;
     Thread threads[thread_count];
 
     std::filesystem::path p{filename};
