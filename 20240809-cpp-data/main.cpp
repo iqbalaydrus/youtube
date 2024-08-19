@@ -5,9 +5,10 @@
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
+#include <filesystem>
 #include <boost/iostreams/device/mapped_file.hpp>
-#include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <boost/utility/string_ref.hpp>
 
 struct locationData {
     uint64_t count = 0;
@@ -17,34 +18,40 @@ struct locationData {
 };
 
 namespace io = boost::iostreams;
-constexpr int buf_size = 4096;
+const std::string filename = "measurements.txt";
 
 struct Thread {
     std::thread thread;
-    std::atomic<int> has_data;
-    long length{};
-    char buffer[buf_size]{};
+    long start{};
+    long end{};
 };
 
 void process_line(Thread &t) {
     std::string line;
-    std::string delimiter = ";";
-    while (true) {
-        t.has_data.wait(0);
-        if (t.has_data == 2) {
+    const char delimiter = ';';
+    io::stream_buffer<io::mapped_file_source> file(filename);
+    std::istream in(&file);
+    if (t.start == 0) {
+        in.seekg(t.start);
+    } else {
+        in.seekg(t.start-1);
+        char c;
+        in.get(c);
+        if (c != '\n') {
+            std::getline(in, line);
+        }
+    }
+    while (std::getline(in, line)) {
+        auto line_ref = boost::string_ref{line};
+        uint64_t pos = line_ref.find(delimiter);
+        boost::string_ref location = line_ref.substr(0, pos);
+        boost::string_ref temperature_str = line_ref.substr(pos+1, line.length());
+        auto temperature_num = std::atof(temperature_str.begin());
+        if (in.tellg() >= t.end) {
             break;
         }
-        io::basic_array_source<char> input_source(t.buffer, t.length);
-        io::stream in(input_source);
-        while (std::getline(in, line)) {
-            uint64_t pos = line.find(delimiter);
-            std::string location = line.substr(0, pos);
-            std::string temperature_str = line.substr(pos+1, line.length());
-            auto temperature_num = std::stof(temperature_str);
-        }
-        t.has_data = 0;
-        t.has_data.notify_one();
     }
+    file.close();
 }
 
 int main_mmap() {
@@ -52,44 +59,19 @@ int main_mmap() {
     constexpr int thread_count = 22;
     Thread threads[thread_count];
 
-    for (auto & i : threads) {
-        i.thread = std::thread{process_line, std::ref(i)};
+    std::filesystem::path p{filename};
+    long size = (long)std::filesystem::file_size(p);
+    long chunk_size = size / thread_count;
+
+    for (int i = 0; i < thread_count; ++i) {
+        threads[i].start = i * chunk_size;
+        threads[i].end = (i + 1) * chunk_size - 1;
+        if (i == thread_count - 1) {
+            threads[i].end = size;
+        }
+        threads[i].thread = std::thread{process_line, std::ref(threads[i])};
     }
 
-    io::stream_buffer<io::mapped_file_source> file("measurements.txt");
-    std::istream in(&file);
-    auto iter = 0;
-    auto fsize = file->size();
-    while (in.good())
-    {
-        auto thread_id = iter%thread_count;
-        threads[thread_id].has_data.wait(1);
-        in.read(threads[thread_id].buffer, buf_size);
-        long i;
-        auto gcount = in.gcount();
-        auto pos = in.tellg();
-        for (i = gcount-1; i >= 0; --i) {
-            if (threads[thread_id].buffer[i] == '\n') {
-                threads[thread_id].length = i + 1;
-                break;
-            }
-            if (pos >= fsize) {
-                threads[thread_id].length = gcount;
-                break;
-            }
-        }
-        pos = pos - (gcount - i + 1);
-        in.seekg(pos);
-        ++iter;
-        threads[thread_id].has_data = 1;
-        threads[thread_id].has_data.notify_one();
-    }
-    file.close();
-    for (auto & thread : threads) {
-        thread.has_data.wait(1);
-        thread.has_data = 2;
-        thread.has_data.notify_one();
-    }
     for (auto & thread : threads) {
         thread.thread.join();
     }
