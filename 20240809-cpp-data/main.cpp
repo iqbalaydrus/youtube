@@ -32,9 +32,10 @@ uint64_t find_from_middle(boost::string_ref &s) {
     auto i = 0;
     auto sign = true;
     while (true) {
-        if (start > s.end() || start < s.begin()) {
-            throw std::invalid_argument("no delimiter found");
-        }
+        // commenting this is considered unsafe, assuming every line has delimiter
+//        if (start > s.end() || start < s.begin()) {
+//            throw std::invalid_argument("no delimiter found");
+//        }
         if (*start == ';') {
             break;
         }
@@ -52,7 +53,6 @@ uint64_t find_from_middle(boost::string_ref &s) {
 
 void process_line(Thread &t) {
     std::string line;
-    const char delimiter = ';';
     io::stream_buffer<io::mapped_file_source> file(filename);
     std::istream in(&file);
     if (t.start == 0) {
@@ -65,7 +65,6 @@ void process_line(Thread &t) {
             std::getline(in, line);
         }
     }
-    auto i = 0;
     while (std::getline(in, line)) {
         auto line_ref = boost::string_ref{line};
         uint64_t pos = find_from_middle(line_ref);
