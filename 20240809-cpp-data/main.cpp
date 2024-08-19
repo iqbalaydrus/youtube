@@ -6,6 +6,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
 
 struct locationData {
@@ -18,20 +19,41 @@ struct locationData {
 namespace io = boost::iostreams;
 constexpr int buf_size = 4096;
 
-void process_line(const char (&buffer)[buf_size]) {
+struct Thread {
+    std::thread thread;
+    std::atomic<int> has_data;
+    long length{};
+    char buffer[buf_size]{};
+};
 
+void process_line(Thread &t) {
+    std::string line;
+    std::string delimiter = ";";
+    while (true) {
+        t.has_data.wait(0);
+        if (t.has_data == 2) {
+            break;
+        }
+        io::basic_array_source<char> input_source(t.buffer, t.length);
+        io::stream in(input_source);
+        while (std::getline(in, line)) {
+            uint64_t pos = line.find(delimiter);
+            std::string location = line.substr(0, pos);
+            std::string temperature_str = line.substr(pos+1, line.length());
+            auto temperature_num = std::stof(temperature_str);
+        }
+        t.has_data = 0;
+        t.has_data.notify_one();
+    }
 }
 
 int main_mmap() {
-    using namespace boost::iostreams;
     auto start = std::chrono::system_clock::now();
     constexpr int thread_count = 11;
-    char data[thread_count][buf_size];
-    std::thread threads[thread_count];
+    Thread threads[thread_count];
 
-    for (int i = 0; i < thread_count; ++i) {
-        std::thread t{process_line, std::cref(data[i])};
-        threads[i] = std::move(t);
+    for (auto & i : threads) {
+        i.thread = std::thread{process_line, std::ref(i)};
     }
 
     io::stream_buffer<io::mapped_file_source> file("measurements.txt");
@@ -41,22 +63,35 @@ int main_mmap() {
     while (in.good())
     {
         auto thread_id = iter%thread_count;
-        in.read(data[thread_id], buf_size);
+        threads[thread_id].has_data.wait(1);
+        in.read(threads[thread_id].buffer, buf_size);
         long i;
         auto gcount = in.gcount();
         auto pos = in.tellg();
         for (i = gcount-1; i >= 0; --i) {
-            if (data[thread_id][i] == '\n' || pos >= fsize) {
+            if (threads[thread_id].buffer[i] == '\n') {
+                threads[thread_id].length = i + 1;
+                break;
+            }
+            if (pos >= fsize) {
+                threads[thread_id].length = gcount;
                 break;
             }
         }
         pos = pos - (gcount - i + 1);
         in.seekg(pos);
         ++iter;
+        threads[thread_id].has_data = 1;
+        threads[thread_id].has_data.notify_one();
     }
     file.close();
     for (auto & thread : threads) {
-        thread.join();
+        thread.has_data.wait(1);
+        thread.has_data = 2;
+        thread.has_data.notify_one();
+    }
+    for (auto & thread : threads) {
+        thread.thread.join();
     }
 
     auto end = std::chrono::system_clock::now();
