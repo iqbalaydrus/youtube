@@ -9,12 +9,13 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/utility/string_ref.hpp>
+#include <boost/algorithm/string.hpp>
 
 struct locationData {
     uint64_t count = 0;
-    float_t total = 0;
-    float_t temp_min = 99;
-    float_t temp_max = -99;
+    double total = 0;
+    double temp_min = 99;
+    double temp_max = -99;
 };
 
 namespace io = boost::iostreams;
@@ -25,6 +26,29 @@ struct Thread {
     long start{};
     long end{};
 };
+
+uint64_t find_from_middle(boost::string_ref &s) {
+    auto start = (s.begin() + ((s.end() - s.begin()) / 2));
+    auto i = 0;
+    auto sign = true;
+    while (true) {
+        if (start > s.end() || start < s.begin()) {
+            throw std::invalid_argument("no delimiter found");
+        }
+        if (*start == ';') {
+            break;
+        }
+        if (sign) {
+            start += i;
+            sign = false;
+        } else {
+            start -= i;
+            sign = true;
+        }
+        ++i;
+    }
+    return start - s.begin();
+}
 
 void process_line(Thread &t) {
     std::string line;
@@ -41,9 +65,10 @@ void process_line(Thread &t) {
             std::getline(in, line);
         }
     }
+    auto i = 0;
     while (std::getline(in, line)) {
         auto line_ref = boost::string_ref{line};
-        uint64_t pos = line_ref.find(delimiter);
+        uint64_t pos = find_from_middle(line_ref);
         boost::string_ref location = line_ref.substr(0, pos);
         boost::string_ref temperature_str = line_ref.substr(pos+1, line.length());
         auto temperature_num = std::atof(temperature_str.begin());
@@ -56,7 +81,7 @@ void process_line(Thread &t) {
 
 int main_mmap() {
     auto start = std::chrono::system_clock::now();
-    constexpr int thread_count = 22;
+    constexpr int thread_count = 1;
     Thread threads[thread_count];
 
     std::filesystem::path p{filename};
