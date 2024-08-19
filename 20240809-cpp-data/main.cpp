@@ -1,6 +1,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <thread>
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
@@ -15,13 +16,23 @@ struct locationData {
 };
 
 namespace io = boost::iostreams;
+constexpr int buf_size = 4096;
+
+void process_line(const char (&buffer)[buf_size]) {
+
+}
 
 int main_mmap() {
     using namespace boost::iostreams;
     auto start = std::chrono::system_clock::now();
-    constexpr int buf_size = 4096;
     constexpr int thread_count = 11;
     char data[thread_count][buf_size];
+    std::thread threads[thread_count];
+
+    for (int i = 0; i < thread_count; ++i) {
+        std::thread t{process_line, std::cref(data[i])};
+        threads[i] = std::move(t);
+    }
 
     io::stream_buffer<io::mapped_file_source> file("measurements.txt");
     std::istream in(&file);
@@ -44,6 +55,9 @@ int main_mmap() {
         ++iter;
     }
     file.close();
+    for (auto & thread : threads) {
+        thread.join();
+    }
 
     auto end = std::chrono::system_clock::now();
     typedef std::chrono::duration<float> fsec;
