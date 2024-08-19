@@ -19,14 +19,29 @@ namespace io = boost::iostreams;
 int main_mmap() {
     using namespace boost::iostreams;
     auto start = std::chrono::system_clock::now();
-    char data[0x1000];
+    constexpr int buf_size = 4096;
+    constexpr int thread_count = 11;
+    char data[thread_count][buf_size];
 
     io::stream_buffer<io::mapped_file_source> file("measurements.txt");
     std::istream in(&file);
-    while (in)
+    auto iter = 0;
+    auto fsize = file->size();
+    while (in.good())
     {
-        in.read(data, 0x1000);
-        // do something with data
+        auto thread_id = iter%thread_count;
+        in.read(data[thread_id], buf_size);
+        long i;
+        auto gcount = in.gcount();
+        auto pos = in.tellg();
+        for (i = gcount-1; i >= 0; --i) {
+            if (data[thread_id][i] == '\n' || pos >= fsize) {
+                break;
+            }
+        }
+        pos = pos - (gcount - i + 1);
+        in.seekg(pos);
+        ++iter;
     }
     file.close();
 
