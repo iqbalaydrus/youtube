@@ -79,6 +79,7 @@ double atof_fast(const char* str) {
 
 void process_line(Thread &t) {
     std::string line;
+    line.reserve(128);
     io::stream_buffer<io::mapped_file_source> file(filename);
     std::istream in(&file);
     if (t.start == 0) {
@@ -92,17 +93,19 @@ void process_line(Thread &t) {
         }
     }
     auto i = 0;
+    uint64_t size = 0;
     while (std::getline(in, line)) {
         ++i;
+        size += line.length()+1;
         auto line_ref = boost::string_ref{line};
         uint64_t pos = find_from_middle(line_ref);
         boost::string_ref location = line_ref.substr(0, pos);
         boost::string_ref temperature_str = line_ref.substr(pos+1, line.length());
         auto temperature_num = atof_fast(temperature_str.begin());
         if (i < 15 && t.num == 0) {
-            std::cout << line << " " << line.length() << std::endl;
+            std::cout << static_cast<void*>(line.data()) << std::endl;
         }
-        if (in.tellg() >= t.end) {
+        if (t.start + size >= t.end) {
             break;
         }
     }
