@@ -26,29 +26,6 @@ struct Thread {
     long end{};
 };
 
-uint64_t find_from_middle(std::string &s) {
-    auto start = (s.data() + (((s.data() + s.length()) - s.data()) / 2));
-    auto i = 0;
-    auto sign = true;
-    while (true) {
-        // commenting this is considered unsafe, assuming every line has delimiter
-//        if (start > (s.data() + s.length()) || start < s.data()) {
-//            throw std::invalid_argument("no delimiter found");
-//        }
-        if (*start == ';') {
-            break;
-        }
-        if (sign) {
-            start += i;
-            sign = false;
-        } else {
-            start -= i;
-            sign = true;
-        }
-        ++i;
-    }
-    return start - s.data();
-}
 
 double atof_fast(const char* str) {
     bool neg = false;
@@ -95,7 +72,7 @@ void process_line(Thread &t) {
     while (std::getline(in, line)) {
         ++i;
         size += line.length()+1;
-        uint64_t pos = find_from_middle(line);
+        uint64_t pos = line.rfind(';', line.length()-4);
         auto location = boost::string_ref{line.data(), pos};
         auto temperature_str = boost::string_ref{line.data()+pos+1, line.length()-pos-1};
         auto temperature_num = atof_fast(temperature_str.begin());
