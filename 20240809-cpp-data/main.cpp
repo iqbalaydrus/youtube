@@ -23,6 +23,7 @@ const std::string filename = "measurements.txt";
 
 struct Thread {
     std::thread thread;
+    uint8_t num{};
     long start{};
     long end{};
 };
@@ -51,6 +52,31 @@ uint64_t find_from_middle(boost::string_ref &s) {
     return start - s.begin();
 }
 
+double atof_fast(const char* str) {
+    bool neg = false;
+    if (*str == '-') {
+        neg = true;
+        ++str;
+    } else if (*str == '+')
+        ++str;
+
+    double value = 0;
+    for (; *str != '.'; ++str) {
+        if (!*str)
+            return neg ? -value : value;
+        value *= 10;
+        value += *str - '0';
+    }
+
+    double decimal = 0, weight = 1;
+    for (; *++str; weight *= 10) {
+        decimal *= 10;
+        decimal += *str - '0';
+    }
+    decimal /= weight;
+    return neg ? -(value + decimal) : (value + decimal);
+}
+
 void process_line(Thread &t) {
     std::string line;
     io::stream_buffer<io::mapped_file_source> file(filename);
@@ -65,12 +91,17 @@ void process_line(Thread &t) {
             std::getline(in, line);
         }
     }
+    auto i = 0;
     while (std::getline(in, line)) {
+        ++i;
         auto line_ref = boost::string_ref{line};
         uint64_t pos = find_from_middle(line_ref);
         boost::string_ref location = line_ref.substr(0, pos);
         boost::string_ref temperature_str = line_ref.substr(pos+1, line.length());
-        auto temperature_num = std::atof(temperature_str.begin());
+        auto temperature_num = atof_fast(temperature_str.begin());
+        if (i < 15 && t.num == 0) {
+            std::cout << line << " " << line.length() << std::endl;
+        }
         if (in.tellg() >= t.end) {
             break;
         }
@@ -88,6 +119,7 @@ int main_mmap() {
     long chunk_size = size / thread_count;
 
     for (int i = 0; i < thread_count; ++i) {
+        threads[i].num = i;
         threads[i].start = i * chunk_size;
         threads[i].end = (i + 1) * chunk_size - 1;
         if (i == thread_count - 1) {
