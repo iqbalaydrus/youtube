@@ -1,5 +1,4 @@
 #include <chrono>
-#include <cmath>
 #include <cstdint>
 #include <thread>
 #include <iostream>
@@ -9,7 +8,6 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/utility/string_ref.hpp>
-#include <boost/algorithm/string.hpp>
 
 struct locationData {
     uint64_t count = 0;
@@ -28,13 +26,13 @@ struct Thread {
     long end{};
 };
 
-uint64_t find_from_middle(boost::string_ref &s) {
-    auto start = (s.begin() + ((s.end() - s.begin()) / 2));
+uint64_t find_from_middle(std::string &s) {
+    auto start = (s.data() + (((s.data() + s.length()) - s.data()) / 2));
     auto i = 0;
     auto sign = true;
     while (true) {
         // commenting this is considered unsafe, assuming every line has delimiter
-//        if (start > s.end() || start < s.begin()) {
+//        if (start > (s.data() + s.length()) || start < s.data()) {
 //            throw std::invalid_argument("no delimiter found");
 //        }
         if (*start == ';') {
@@ -49,7 +47,7 @@ uint64_t find_from_middle(boost::string_ref &s) {
         }
         ++i;
     }
-    return start - s.begin();
+    return start - s.data();
 }
 
 double atof_fast(const char* str) {
@@ -97,13 +95,12 @@ void process_line(Thread &t) {
     while (std::getline(in, line)) {
         ++i;
         size += line.length()+1;
-        auto line_ref = boost::string_ref{line};
-        uint64_t pos = find_from_middle(line_ref);
-        boost::string_ref location = line_ref.substr(0, pos);
-        boost::string_ref temperature_str = line_ref.substr(pos+1, line.length());
+        uint64_t pos = find_from_middle(line);
+        auto location = boost::string_ref{line.data(), pos};
+        auto temperature_str = boost::string_ref{line.data()+pos+1, line.length()-pos-1};
         auto temperature_num = atof_fast(temperature_str.begin());
         if (i < 15 && t.num == 0) {
-            std::cout << static_cast<void*>(line.data()) << std::endl;
+            std::cout << location << " " << temperature_str << std::endl;
         }
         if (t.start + size >= t.end) {
             break;
