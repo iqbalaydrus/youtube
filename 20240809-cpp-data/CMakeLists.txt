@@ -14,6 +14,7 @@ find_package(Boost 1.86.0 REQUIRED COMPONENTS iostreams)
 
 # Include Boost headers
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories("${CMAKE_SOURCE_DIR}/include")
 
 add_executable(20240809_cpp_data main.cpp)
 

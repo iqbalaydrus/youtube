@@ -24,6 +24,7 @@ struct Thread {
     uint8_t num{};
     long start{};
     long end{};
+    std::unordered_map<std::string, locationData, std::hash<std::string>> map{};
 };
 
 
@@ -73,11 +74,30 @@ void process_line(Thread &t) {
         ++i;
         size += line.length()+1;
         uint64_t pos = line.rfind(';', line.length()-4);
-        auto location = boost::string_ref{line.data(), pos};
         auto temperature_str = boost::string_ref{line.data()+pos+1, line.length()-pos-1};
         auto temperature_num = atof_fast(temperature_str.begin());
+        auto location_str = std::string{line.data(), pos};
+        try {
+            auto loc_value = t.map.at(location_str);
+            loc_value.count++;
+            loc_value.total += temperature_num;
+            if (loc_value.temp_max < temperature_num) {
+                loc_value.temp_max = temperature_num;
+            }
+            if (loc_value.temp_min > temperature_num) {
+                loc_value.temp_min = temperature_num;
+            }
+            t.map[location_str] = loc_value;
+        } catch (std::out_of_range &e) {
+            t.map[location_str] = locationData{
+                    .count = 1,
+                    .total = temperature_num,
+                    .temp_min = temperature_num,
+                    .temp_max = temperature_num,
+            };
+        }
         if (i < 15 && t.num == 0) {
-            std::cout << location << " " << temperature_str << std::endl;
+//            std::cout << location_str << " " << temperature_str << std::endl;
         }
         if (t.start + size >= t.end) {
             break;
@@ -103,6 +123,7 @@ int main_mmap() {
             threads[i].end = size;
         }
         threads[i].thread = std::thread{process_line, std::ref(threads[i])};
+        threads[i].map.reserve(512);
     }
 
     for (auto & thread : threads) {
