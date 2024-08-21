@@ -18,6 +18,7 @@ struct locationData {
 
 namespace io = boost::iostreams;
 const std::string filename = "measurements.txt";
+constexpr int thread_count = 22;
 
 struct Thread {
     std::thread thread;
@@ -108,7 +109,6 @@ void process_line(Thread &t) {
 
 int main_mmap() {
     auto start = std::chrono::system_clock::now();
-    constexpr int thread_count = 22;
     Thread threads[thread_count];
 
     std::filesystem::path p{filename};
@@ -140,7 +140,7 @@ int main_mmap() {
 int main_ifstream() {
     auto start = std::chrono::system_clock::now();
     char data[0x1000];
-    std::ifstream in("measurements.txt");
+    std::ifstream in(filename);
 
     while (in)
     {
@@ -157,7 +157,7 @@ int main_ifstream() {
 
 int main_old() {
     auto start = std::chrono::system_clock::now();
-    std::ifstream file{"measurements.txt", std::ios_base::in};
+    std::ifstream file{filename, std::ios_base::in};
     if (!file) std::cerr << "Can't open input file!";
     if (file.is_open()) {
         std::string line;
