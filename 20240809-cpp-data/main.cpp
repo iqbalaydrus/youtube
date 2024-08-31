@@ -1,6 +1,9 @@
+#include <chrono>
+#include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <fstream>
-#include <map>
+#include <unordered_map>
 
 struct locationData {
     uint64_t count = 0;
@@ -28,7 +31,7 @@ int main() {
             std::string location = line.substr(0, pos);
             std::string temperature_str = line.substr(pos+1, line.length());
             float temperature_num = std::stof(temperature_str);
-            if (loc_data.find(location) == loc_data.end()) {
+            if (!loc_data.contains(location)) {
                 loc_data[location] = locationData{
                     .count = 1,
                     .total = temperature_num,
