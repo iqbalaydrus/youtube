@@ -1,0 +1,10 @@
+version: '3'
+services:
+  fe:
+    image: my-fe
+  api:
+    image: my-api
+  postgres:
+    image: postgres:17
+  nginx:
+    image: linuxserver/swag
