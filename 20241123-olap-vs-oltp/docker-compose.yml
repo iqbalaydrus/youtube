@@ -1,0 +1,12 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.10
+    volumes:
+      - ./dockervol/clickhouse:/var/lib/clickhouse/
+  postgres:
+    image: postgres:17
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./dockervol/postgres:/var/lib/postgresql/data
