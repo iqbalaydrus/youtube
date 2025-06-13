@@ -1,0 +1,76 @@
+services:
+  etcd1:
+    image: bitnami/etcd:3.6.1
+    restart: always
+    volumes:
+      - ./data/etcd1:/bitnami/etcd
+      - ./config/certs/etcd1:/etc/ssl/certs
+      - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+    environment:
+      ETCD_NAME: etcd1
+      ETCD_ROOT_PASSWORD: wie3Uof0beudathe
+      ETCD_CERT_FILE: /etc/ssl/certs/server.crt
+      ETCD_KEY_FILE: /etc/ssl/certs/server.key
+      ETCD_TRUSTED_CA_FILE: /etc/ssl/ca.crt
+      ETCD_PEER_CERT_FILE: /etc/ssl/certs/server.crt
+      ETCD_PEER_KEY_FILE: /etc/ssl/certs/server.key
+      ETCD_PEER_TRUSTED_CA_FILE: /etc/ssl/ca.crt
+      ETCD_PEER_CLIENT_CERT_AUTH: "true"
+      ETCD_LISTEN_CLIENT_URLS: https://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: https://etcd1:2379
+      ETCD_LISTEN_PEER_URLS: https://0.0.0.0:2380
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: https://etcd1:2380
+      ETCD_INITIAL_CLUSTER_TOKEN: etcd-cluster
+      ETCD_INITIAL_CLUSTER: etcd1=https://etcd1:2380,etcd2=https://etcd2:2380,etcd3=https://etcd3:2380
+  etcd2:
+    image: bitnami/etcd:3.6.1
+    restart: always
+    volumes:
+      - ./data/etcd2:/bitnami/etcd
+      - ./config/certs/etcd2:/etc/ssl/certs
+      - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+    environment:
+      ETCD_NAME: etcd2
+      ETCD_ROOT_PASSWORD: wie3Uof0beudathe
+      ETCD_CERT_FILE: /etc/ssl/certs/server.crt
+      ETCD_KEY_FILE: /etc/ssl/certs/server.key
+      ETCD_TRUSTED_CA_FILE: /etc/ssl/ca.crt
+      ETCD_PEER_CERT_FILE: /etc/ssl/certs/server.crt
+      ETCD_PEER_KEY_FILE: /etc/ssl/certs/server.key
+      ETCD_PEER_TRUSTED_CA_FILE: /etc/ssl/ca.crt
+      ETCD_PEER_CLIENT_CERT_AUTH: "true"
+      ETCD_LISTEN_CLIENT_URLS: https://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: https://etcd2:2379
+      ETCD_LISTEN_PEER_URLS: https://0.0.0.0:2380
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: https://etcd2:2380
+      ETCD_INITIAL_CLUSTER_TOKEN: etcd-cluster
+      ETCD_INITIAL_CLUSTER: etcd1=https://etcd1:2380,etcd2=https://etcd2:2380,etcd3=https://etcd3:2380
+  etcd3:
+    image: bitnami/etcd:3.6.1
+    restart: always
+    volumes:
+      - ./data/etcd3:/bitnami/etcd
+      - ./config/certs/etcd3:/etc/ssl/certs
+      - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+    environment:
+      ETCD_NAME: etcd3
+      ETCD_ROOT_PASSWORD: wie3Uof0beudathe
+      ETCD_CERT_FILE: /etc/ssl/certs/server.crt
+      ETCD_KEY_FILE: /etc/ssl/certs/server.key
+      ETCD_TRUSTED_CA_FILE: /etc/ssl/ca.crt
+      ETCD_PEER_CERT_FILE: /etc/ssl/certs/server.crt
+      ETCD_PEER_KEY_FILE: /etc/ssl/certs/server.key
+      ETCD_PEER_TRUSTED_CA_FILE: /etc/ssl/ca.crt
+      ETCD_PEER_CLIENT_CERT_AUTH: "true"
+      ETCD_LISTEN_CLIENT_URLS: https://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: https://etcd3:2379
+      ETCD_LISTEN_PEER_URLS: https://0.0.0.0:2380
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: https://etcd3:2380
+      ETCD_INITIAL_CLUSTER_TOKEN: etcd-cluster
+      ETCD_INITIAL_CLUSTER: etcd1=https://etcd1:2380,etcd2=https://etcd2:2380,etcd3=https://etcd3:2380
+#  postgres1:
+#  postgres2:
+#  haproxy:
+#  minio:
+#  grafana:
+#  prometheus:
