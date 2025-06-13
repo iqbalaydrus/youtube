@@ -7,6 +7,7 @@ services:
       - ./config/certs/etcd1:/etc/ssl/certs
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
     environment:
+      TZ: Asia/Jakarta
       ETCD_NAME: etcd1
       ETCD_ROOT_PASSWORD: wie3Uof0beudathe
       ETCD_CERT_FILE: /etc/ssl/certs/server.crt
@@ -20,7 +21,7 @@ services:
       ETCD_ADVERTISE_CLIENT_URLS: https://etcd1:2379
       ETCD_LISTEN_PEER_URLS: https://0.0.0.0:2380
       ETCD_INITIAL_ADVERTISE_PEER_URLS: https://etcd1:2380
-      ETCD_INITIAL_CLUSTER_TOKEN: etcd-cluster
+      ETCD_INITIAL_CLUSTER_TOKEN: iqbal-etcd-cluster
       ETCD_INITIAL_CLUSTER: etcd1=https://etcd1:2380,etcd2=https://etcd2:2380,etcd3=https://etcd3:2380
   etcd2:
     image: bitnami/etcd:3.6.1
@@ -30,6 +31,7 @@ services:
       - ./config/certs/etcd2:/etc/ssl/certs
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
     environment:
+      TZ: Asia/Jakarta
       ETCD_NAME: etcd2
       ETCD_ROOT_PASSWORD: wie3Uof0beudathe
       ETCD_CERT_FILE: /etc/ssl/certs/server.crt
@@ -43,7 +45,7 @@ services:
       ETCD_ADVERTISE_CLIENT_URLS: https://etcd2:2379
       ETCD_LISTEN_PEER_URLS: https://0.0.0.0:2380
       ETCD_INITIAL_ADVERTISE_PEER_URLS: https://etcd2:2380
-      ETCD_INITIAL_CLUSTER_TOKEN: etcd-cluster
+      ETCD_INITIAL_CLUSTER_TOKEN: iqbal-etcd-cluster
       ETCD_INITIAL_CLUSTER: etcd1=https://etcd1:2380,etcd2=https://etcd2:2380,etcd3=https://etcd3:2380
   etcd3:
     image: bitnami/etcd:3.6.1
@@ -53,6 +55,7 @@ services:
       - ./config/certs/etcd3:/etc/ssl/certs
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
     environment:
+      TZ: Asia/Jakarta
       ETCD_NAME: etcd3
       ETCD_ROOT_PASSWORD: wie3Uof0beudathe
       ETCD_CERT_FILE: /etc/ssl/certs/server.crt
@@ -66,10 +69,41 @@ services:
       ETCD_ADVERTISE_CLIENT_URLS: https://etcd3:2379
       ETCD_LISTEN_PEER_URLS: https://0.0.0.0:2380
       ETCD_INITIAL_ADVERTISE_PEER_URLS: https://etcd3:2380
-      ETCD_INITIAL_CLUSTER_TOKEN: etcd-cluster
+      ETCD_INITIAL_CLUSTER_TOKEN: iqbal-etcd-cluster
       ETCD_INITIAL_CLUSTER: etcd1=https://etcd1:2380,etcd2=https://etcd2:2380,etcd3=https://etcd3:2380
-#  postgres1:
+  postgres1:
+    # this public spilo image doesn't have timescaledb community edition
+    # to have one, you need to build the image yourself
+    image: ghcr.io/zalando/spilo-17:4.0-p2
+    restart: always
+    volumes:
+      - ./data/postgres1:/home/postgres/pgdata
+      - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+    environment:
+      TZ: Asia/Jakarta
+      SCOPE: iqbal-spilo-cluster
+      ETCD3_HOSTS: etcd1:2379,etcd2:2379,etcd3:2379
+      ETCD3_PROTOCOL: https
+      ETCD3_CACERT: /etc/ssl/ca.crt
+      # it's better to set up a new user for this
+      ETCD3_USERNAME: root
+      ETCD3_PASSWORD: wie3Uof0beudathe
+      SSL_CA_FILE: /etc/ssl/ca.crt
+      SSL_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
+      SSL_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
+      SSL_RESTAPI_CA_FILE: /etc/ssl/ca.crt
+      SSL_RESTAPI_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
+      SSL_RESTAPI_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
+      RESTAPI_CONNECT_ADDRESS: postgres1
+      WAL_S3_BUCKET: iqbal-spilo-backup
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: OoCuosoh3Oozequa
+      AWS_ENDPOINT: https://minio:9000
+#  postgres1-exporter:
+#  pgbouncer1-exporter:
 #  postgres2:
+#  postgres2-exporter:
+#  pgbouncer2-exporter:
 #  haproxy:
 #  minio:
 #  grafana:
