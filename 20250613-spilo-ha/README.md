@@ -22,11 +22,21 @@ openssl req -x509 -subj "/CN=Iqbal Youtube" -nodes -key ca.key -days 3650 -out c
 
 ## Create etcd Server and Peer Certificates
 Do this for each server. This works on homebrew's openssl version 3.5 on macos.
-If you're using ip address on your advertised peer, you should use "IP:x.x.x.x" instead of DNS:etcd1 on subjectAltName
+If you're using ip address on your advertised peer, you should use "IP:x.x.x.x" instead of DNS:etcd1 on subjectAltName.
+Or add both DNS or IP just to be safe.
 ```shell
 cd config/certs/etcd1
 # replace etcd1 with your domain
-openssl req -newkey rsa:2048 -nodes -subj "/CN=etcd1" -addext "subjectAltName = DNS:etcd1" -keyout server.key -out server.csr
+openssl req -newkey rsa:2048 -nodes -subj "/CN=etcd1" -addext "subjectAltName = DNS:etcd1,DNS:localhost,IP:127.0.0.1" -keyout server.key -out server.csr
+openssl x509 -req -copy_extensions copy -in server.csr -out server.crt -CAcreateserial -CA ../ca/ca.crt -CAkey ../ca/ca.key -days 3600
+rm server.csr ../ca/ca.srl
+```
+
+## Create Postgres Certificates
+Also do this for each server.
+```shell
+cd config/certs/postgres1
+openssl req -newkey rsa:2048 -nodes -subj "/CN=postgres1" -addext "subjectAltName = DNS:postgres1,DNS:localhost,IP:127.0.0.1" -keyout server.key -out server.csr
 openssl x509 -req -copy_extensions copy -in server.csr -out server.crt -CAcreateserial -CA ../ca/ca.crt -CAkey ../ca/ca.key -days 3600
 rm server.csr ../ca/ca.srl
 ```

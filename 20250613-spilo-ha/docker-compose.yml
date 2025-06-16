@@ -12,7 +12,6 @@ services:
       ETCD_ROOT_PASSWORD: wie3Uof0beudathe
       ETCD_CERT_FILE: /etc/ssl/certs/server.crt
       ETCD_KEY_FILE: /etc/ssl/certs/server.key
-      ETCD_TRUSTED_CA_FILE: /etc/ssl/ca.crt
       ETCD_PEER_CERT_FILE: /etc/ssl/certs/server.crt
       ETCD_PEER_KEY_FILE: /etc/ssl/certs/server.key
       ETCD_PEER_TRUSTED_CA_FILE: /etc/ssl/ca.crt
@@ -36,7 +35,6 @@ services:
       ETCD_ROOT_PASSWORD: wie3Uof0beudathe
       ETCD_CERT_FILE: /etc/ssl/certs/server.crt
       ETCD_KEY_FILE: /etc/ssl/certs/server.key
-      ETCD_TRUSTED_CA_FILE: /etc/ssl/ca.crt
       ETCD_PEER_CERT_FILE: /etc/ssl/certs/server.crt
       ETCD_PEER_KEY_FILE: /etc/ssl/certs/server.key
       ETCD_PEER_TRUSTED_CA_FILE: /etc/ssl/ca.crt
@@ -60,7 +58,6 @@ services:
       ETCD_ROOT_PASSWORD: wie3Uof0beudathe
       ETCD_CERT_FILE: /etc/ssl/certs/server.crt
       ETCD_KEY_FILE: /etc/ssl/certs/server.key
-      ETCD_TRUSTED_CA_FILE: /etc/ssl/ca.crt
       ETCD_PEER_CERT_FILE: /etc/ssl/certs/server.crt
       ETCD_PEER_KEY_FILE: /etc/ssl/certs/server.key
       ETCD_PEER_TRUSTED_CA_FILE: /etc/ssl/ca.crt
@@ -78,6 +75,41 @@ services:
     restart: always
     volumes:
       - ./data/postgres1:/home/postgres/pgdata
+      - ./config/certs/postgres1:/etc/ssl/certs
+      - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+    environment:
+      TZ: Asia/Jakarta
+      SCOPE: iqbal-spilo-cluster
+      ETCD3_HOSTS: etcd1:2379,etcd2:2379,etcd3:2379
+      ETCD3_PROTOCOL: https
+      ETCD3_CACERT: /etc/ssl/ca.crt
+      SPILO_CONFIGURATION: |
+        log:
+          level: DEBUG
+      # it's better to set up a new user for this
+      ETCD3_USERNAME: root
+      ETCD3_PASSWORD: wie3Uof0beudathe
+      SSL_CA_FILE: /etc/ssl/ca.crt
+      SSL_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
+      SSL_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
+      SSL_RESTAPI_CA_FILE: /etc/ssl/ca.crt
+      SSL_RESTAPI_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
+      SSL_RESTAPI_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
+      RESTAPI_CONNECT_ADDRESS: postgres1
+#      WAL_S3_BUCKET: iqbal-spilo-backup
+#      AWS_ACCESS_KEY_ID: admin
+#      AWS_SECRET_ACCESS_KEY: OoCuosoh3Oozequa
+#      AWS_ENDPOINT: https://minio:9000
+#  postgres1-exporter:
+#  pgbouncer1-exporter:
+  postgres2:
+    # this public spilo image doesn't have timescaledb community edition
+    # to have one, you need to build the image yourself
+    image: ghcr.io/zalando/spilo-17:4.0-p2
+    restart: always
+    volumes:
+      - ./data/postgres2:/home/postgres/pgdata
+      - ./config/certs/postgres2:/etc/ssl/certs
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
     environment:
       TZ: Asia/Jakarta
@@ -94,14 +126,11 @@ services:
       SSL_RESTAPI_CA_FILE: /etc/ssl/ca.crt
       SSL_RESTAPI_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
       SSL_RESTAPI_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
-      RESTAPI_CONNECT_ADDRESS: postgres1
-      WAL_S3_BUCKET: iqbal-spilo-backup
-      AWS_ACCESS_KEY_ID: admin
-      AWS_SECRET_ACCESS_KEY: OoCuosoh3Oozequa
-      AWS_ENDPOINT: https://minio:9000
-#  postgres1-exporter:
-#  pgbouncer1-exporter:
-#  postgres2:
+      RESTAPI_CONNECT_ADDRESS: postgres2
+#      WAL_S3_BUCKET: iqbal-spilo-backup
+#      AWS_ACCESS_KEY_ID: admin
+#      AWS_SECRET_ACCESS_KEY: OoCuosoh3Oozequa
+#      AWS_ENDPOINT: https://minio:9000
 #  postgres2-exporter:
 #  pgbouncer2-exporter:
 #  haproxy:
