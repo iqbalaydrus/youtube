@@ -6,6 +6,7 @@ services:
       - ./data/etcd1:/bitnami/etcd
       - ./config/certs/etcd1:/etc/ssl/certs
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - /etc/localtime:/etc/localtime
     environment:
       TZ: Asia/Jakarta
       ETCD_NAME: etcd1
@@ -29,6 +30,7 @@ services:
       - ./data/etcd2:/bitnami/etcd
       - ./config/certs/etcd2:/etc/ssl/certs
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - /etc/localtime:/etc/localtime
     environment:
       TZ: Asia/Jakarta
       ETCD_NAME: etcd2
@@ -52,6 +54,7 @@ services:
       - ./data/etcd3:/bitnami/etcd
       - ./config/certs/etcd3:/etc/ssl/certs
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - /etc/localtime:/etc/localtime
     environment:
       TZ: Asia/Jakarta
       ETCD_NAME: etcd3
@@ -78,6 +81,7 @@ services:
       - ./data/postgres1:/home/postgres/pgdata
       - ./config/certs/postgres1:/etc/ssl/certs
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - /etc/localtime:/etc/localtime
     environment:
       TZ: Asia/Jakarta
       SCOPE: iqbal-spilo-cluster
@@ -110,6 +114,7 @@ services:
       - ./data/postgres2:/home/postgres/pgdata
       - ./config/certs/postgres2:/etc/ssl/certs
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - /etc/localtime:/etc/localtime
     environment:
       TZ: Asia/Jakarta
       SCOPE: iqbal-spilo-cluster
@@ -133,6 +138,37 @@ services:
 #  postgres2-exporter:
 #  pgbouncer2-exporter:
 #  haproxy:
-#  minio:
+  minio1:
+    image: minio/minio:RELEASE.2025-05-24T17-08-30Z
+    restart: always
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - ./data/minio1:/mnt/data
+      - /etc/localtime:/etc/localtime
+      - ./config/certs/minio1:/etc/ssl/certs
+    environment:
+      TZ: Asia/Jakarta
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: ohc6OhbahC3Oobai
+      MINIO_VOLUMES: https://minio1/mnt/data https://minio2/mnt/data
+      MINIO_OPTS: "--certs-dir /etc/ssl/certs"
+    command:
+      - server
+      - --certs-dir
+      - /etc/ssl/certs
+  minio2:
+    image: minio/minio:RELEASE.2025-05-24T17-08-30Z
+    restart: always
+    volumes:
+      - ./data/minio2:/mnt/data
+      - /etc/localtime:/etc/localtime
+      - ./config/certs/minio2:/etc/ssl/certs
+    environment:
+      TZ: Asia/Jakarta
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: ohc6OhbahC3Oobai
+      MINIO_VOLUMES: https://minio1/mnt/data https://minio2/mnt/data
+      MINIO_OPTS: "--certs-dir /etc/ssl/certs"
 #  grafana:
 #  prometheus:

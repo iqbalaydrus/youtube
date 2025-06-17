@@ -40,3 +40,13 @@ openssl req -newkey rsa:2048 -nodes -subj "/CN=postgres1" -addext "subjectAltNam
 openssl x509 -req -copy_extensions copy -in server.csr -out server.crt -CAcreateserial -CA ../ca/ca.crt -CAkey ../ca/ca.key -days 3600
 rm server.csr ../ca/ca.srl
 ```
+
+## Create Minio Certificates
+```shell
+cd config/certs/minio1
+openssl req -newkey rsa:2048 -nodes -subj "/CN=minio1" -addext "subjectAltName = DNS:minio1,DNS:localhost,IP:127.0.0.1" -keyout server.key -out server.csr
+openssl x509 -req -copy_extensions copy -in server.csr -out server.crt -CAcreateserial -CA ../ca/ca.crt -CAkey ../ca/ca.key -days 3600
+rm server.csr ../ca/ca.srl
+mv server.key private.key
+mv server.crt public.crt
+```
