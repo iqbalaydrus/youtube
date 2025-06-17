@@ -1,4 +1,13 @@
 services:
+  haproxy:
+    image: haproxy:3.2.1
+    restart: always
+    volumes:
+      - ./config/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - /etc/localtime:/etc/localtime
+    environment:
+      TZ: Asia/Jakarta
   etcd1:
     image: bitnami/etcd:3.6.1
     restart: always
@@ -100,7 +109,7 @@ services:
       RESTAPI_CONNECT_ADDRESS: postgres1
 #      WAL_S3_BUCKET: iqbal-spilo-backup
 #      AWS_ACCESS_KEY_ID: admin
-#      AWS_SECRET_ACCESS_KEY: OoCuosoh3Oozequa
+#      AWS_SECRET_ACCESS_KEY: ohc6OhbahC3Oobai
 #      AWS_ENDPOINT: https://minio:9000
 #  postgres1-exporter:
 #  pgbouncer1-exporter:
@@ -133,7 +142,7 @@ services:
       RESTAPI_CONNECT_ADDRESS: postgres2
 #      WAL_S3_BUCKET: iqbal-spilo-backup
 #      AWS_ACCESS_KEY_ID: admin
-#      AWS_SECRET_ACCESS_KEY: OoCuosoh3Oozequa
+#      AWS_SECRET_ACCESS_KEY: ohc6OhbahC3Oobai
 #      AWS_ENDPOINT: https://minio:9000
 #  postgres2-exporter:
 #  pgbouncer2-exporter:
