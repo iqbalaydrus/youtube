@@ -142,21 +142,24 @@ services:
     image: minio/minio:RELEASE.2025-05-24T17-08-30Z
     restart: always
     ports:
-      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
       - ./data/minio1:/mnt/data
       - /etc/localtime:/etc/localtime
       - ./config/certs/minio1:/etc/ssl/certs
+      - ./config/certs/ca/ca.crt:/etc/ssl/certs/CAs/ca.crt
     environment:
       TZ: Asia/Jakarta
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: ohc6OhbahC3Oobai
-      MINIO_VOLUMES: https://minio1/mnt/data https://minio2/mnt/data
-      MINIO_OPTS: "--certs-dir /etc/ssl/certs"
+      MINIO_VOLUMES: https://minio{1...2}/mnt/data
+      MINIO_STORAGE_CLASS_STANDARD: "EC:1"
     command:
       - server
       - --certs-dir
       - /etc/ssl/certs
+      - --console-address
+      - ":9001"
   minio2:
     image: minio/minio:RELEASE.2025-05-24T17-08-30Z
     restart: always
@@ -164,11 +167,18 @@ services:
       - ./data/minio2:/mnt/data
       - /etc/localtime:/etc/localtime
       - ./config/certs/minio2:/etc/ssl/certs
+      - ./config/certs/ca/ca.crt:/etc/ssl/certs/CAs/ca.crt
     environment:
       TZ: Asia/Jakarta
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: ohc6OhbahC3Oobai
-      MINIO_VOLUMES: https://minio1/mnt/data https://minio2/mnt/data
-      MINIO_OPTS: "--certs-dir /etc/ssl/certs"
+      MINIO_VOLUMES: https://minio{1...2}/mnt/data
+      MINIO_STORAGE_CLASS_STANDARD: "EC:1"
+    command:
+      - server
+      - --certs-dir
+      - /etc/ssl/certs
+      - --console-address
+      - ":9001"
 #  grafana:
 #  prometheus:
