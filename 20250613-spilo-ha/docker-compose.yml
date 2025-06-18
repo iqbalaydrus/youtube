@@ -109,14 +109,17 @@ services:
       SSL_CA_FILE: /etc/ssl/ca.crt
       SSL_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
       SSL_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
-      SSL_RESTAPI_CA_FILE: /etc/ssl/ca.crt
-      SSL_RESTAPI_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
-      SSL_RESTAPI_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
+# open bug at spilo: https://github.com/zalando/spilo/issues/889
+#      SSL_RESTAPI_CA_FILE: /etc/ssl/ca.crt
+#      SSL_RESTAPI_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
+#      SSL_RESTAPI_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
       RESTAPI_CONNECT_ADDRESS: postgres1
+      USE_WALG_BACKUP: "true"
       WAL_S3_BUCKET: iqbal-spilo-backup
       AWS_ACCESS_KEY_ID: admin
       AWS_SECRET_ACCESS_KEY: ohc6OhbahC3Oobai
       AWS_ENDPOINT: https://haproxy:9000
+      WALG_S3_CA_CERT_FILE: /etc/ssl/ca.crt
 #  postgres1-exporter:
 #  pgbouncer1-exporter:
   postgres2:
@@ -142,14 +145,17 @@ services:
       SSL_CA_FILE: /etc/ssl/ca.crt
       SSL_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
       SSL_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
-      SSL_RESTAPI_CA_FILE: /etc/ssl/ca.crt
-      SSL_RESTAPI_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
-      SSL_RESTAPI_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
+# open bug at spilo: https://github.com/zalando/spilo/issues/889
+#      SSL_RESTAPI_CA_FILE: /etc/ssl/ca.crt
+#      SSL_RESTAPI_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
+#      SSL_RESTAPI_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
       RESTAPI_CONNECT_ADDRESS: postgres2
+      USE_WALG_BACKUP: "true"
       WAL_S3_BUCKET: iqbal-spilo-backup
       AWS_ACCESS_KEY_ID: admin
       AWS_SECRET_ACCESS_KEY: ohc6OhbahC3Oobai
       AWS_ENDPOINT: https://haproxy:9000
+      WALG_S3_CA_CERT_FILE: /etc/ssl/ca.crt
 #  postgres2-exporter:
 #  pgbouncer2-exporter:
 #  haproxy:
