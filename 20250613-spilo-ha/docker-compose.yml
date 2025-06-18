@@ -5,6 +5,7 @@ services:
     volumes:
       - ./config/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - ./config/certs/haproxy:/etc/ssl/certs
       - /etc/localtime:/etc/localtime
     environment:
       TZ: Asia/Jakarta
@@ -107,10 +108,10 @@ services:
       SSL_RESTAPI_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
       SSL_RESTAPI_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
       RESTAPI_CONNECT_ADDRESS: postgres1
-#      WAL_S3_BUCKET: iqbal-spilo-backup
-#      AWS_ACCESS_KEY_ID: admin
-#      AWS_SECRET_ACCESS_KEY: ohc6OhbahC3Oobai
-#      AWS_ENDPOINT: https://minio:9000
+      WAL_S3_BUCKET: iqbal-spilo-backup
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: ohc6OhbahC3Oobai
+      AWS_ENDPOINT: https://haproxy:9000
 #  postgres1-exporter:
 #  pgbouncer1-exporter:
   postgres2:
@@ -140,10 +141,10 @@ services:
       SSL_RESTAPI_CERTIFICATE_FILE: /etc/ssl/certs/server.crt
       SSL_RESTAPI_PRIVATE_KEY_FILE: /etc/ssl/certs/server.key
       RESTAPI_CONNECT_ADDRESS: postgres2
-#      WAL_S3_BUCKET: iqbal-spilo-backup
-#      AWS_ACCESS_KEY_ID: admin
-#      AWS_SECRET_ACCESS_KEY: ohc6OhbahC3Oobai
-#      AWS_ENDPOINT: https://minio:9000
+      WAL_S3_BUCKET: iqbal-spilo-backup
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: ohc6OhbahC3Oobai
+      AWS_ENDPOINT: https://haproxy:9000
 #  postgres2-exporter:
 #  pgbouncer2-exporter:
 #  haproxy:
