@@ -57,7 +57,6 @@ cd config/certs/haproxy
 openssl req -newkey rsa:2048 -nodes -subj "/CN=haproxy" -addext "subjectAltName = DNS:haproxy,DNS:localhost,IP:127.0.0.1" -keyout server.key -out server.csr
 openssl x509 -req -copy_extensions copy -in server.csr -out server.crt -CAcreateserial -CA ../ca/ca.crt -CAkey ../ca/ca.key -days 3600
 rm server.csr ../ca/ca.srl
-cat server.key > server.pem
-cat server.crt > server.pem
-rm server.key server.crt
+mv server.key server.pem.key
+mv server.crt server.pem
 ```
