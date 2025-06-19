@@ -141,6 +141,8 @@ services:
         client_tls_sslmode = prefer
         client_tls_key_file = /etc/ssl/certs/server.key
         client_tls_cert_file = /etc/ssl/certs/server.crt
+        client_tls_ca_file = /etc/ssl/ca.crt
+        server_tls_ca_file = /etc/ssl/ca.crt
         default_pool_size = 75
         ignore_startup_parameters = extra_float_digits, options
         max_client_conn = 500
@@ -148,17 +150,26 @@ services:
         server_reset_query = DISCARD ALL
         stats_users = monitoring
       SPILO_CONFIGURATION: |
+        bootstrap:
+          dcs:
+            postgresql:
+              parameters:
+                password_encryption: scram-sha-256
+          initdb:
+            - auth: scram-sha-256
+            - encoding: UTF8
+            - data-checksums
         postgresql:
           pg_hba:
             - local     all          all                       trust
             - local     replication  standby                   trust
-            - hostssl   replication  standby     all           md5
+            - hostssl   replication  standby     all           scram-sha-256
             - hostssl   all          +zalandos   127.0.0.1/32  pam
             - hostssl   all          +zalandos   ::1/128       pam
-            - host      all          all         127.0.0.1/32  md5
-            - host      all          all         ::1/128       md5
+            - host      all          all         127.0.0.1/32  scram-sha-256
+            - host      all          all         ::1/128       scram-sha-256
             - hostssl   all          +zalandos   all           pam
-            - hostssl   all          all         all           md5
+            - hostssl   all          all         all           scram-sha-256
             - hostnossl all          all         all           reject
   postgres1-exporter:
     image: bitnami/postgres-exporter:0.17.1
@@ -226,6 +237,8 @@ services:
         client_tls_sslmode = prefer
         client_tls_key_file = /etc/ssl/certs/server.key
         client_tls_cert_file = /etc/ssl/certs/server.crt
+        client_tls_ca_file = /etc/ssl/ca.crt
+        server_tls_ca_file = /etc/ssl/ca.crt
         default_pool_size = 75
         ignore_startup_parameters = extra_float_digits, options
         max_client_conn = 500
@@ -233,17 +246,26 @@ services:
         server_reset_query = DISCARD ALL
         stats_users = monitoring
       SPILO_CONFIGURATION: |
+        bootstrap:
+          dcs:
+            postgresql:
+              parameters:
+                password_encryption: scram-sha-256
+          initdb:
+            - auth: scram-sha-256
+            - encoding: UTF8
+            - data-checksums
         postgresql:
           pg_hba:
             - local     all          all                       trust
             - local     replication  standby                   trust
-            - hostssl   replication  standby     all           md5
+            - hostssl   replication  standby     all           scram-sha-256
             - hostssl   all          +zalandos   127.0.0.1/32  pam
             - hostssl   all          +zalandos   ::1/128       pam
-            - host      all          all         127.0.0.1/32  md5
-            - host      all          all         ::1/128       md5
+            - host      all          all         127.0.0.1/32  scram-sha-256
+            - host      all          all         ::1/128       scram-sha-256
             - hostssl   all          +zalandos   all           pam
-            - hostssl   all          all         all           md5
+            - hostssl   all          all         all           scram-sha-256
             - hostnossl all          all         all           reject
   postgres2-exporter:
     image: bitnami/postgres-exporter:0.17.1

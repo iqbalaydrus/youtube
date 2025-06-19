@@ -70,5 +70,5 @@ Then open minio console in your web browser `https://127.0.0.1:9001`, and
 create the bucket. We'll create `iqbal-spilo-backup` in this example.
 Then start postgres services.
 ```shell
-docker compose up -d postgres1 postgres2
+docker compose up -d postgres1 postgres1-exporter pgbouncer1-exporter postgres2 postgres2-exporter pgbouncer2-exporter
 ```
