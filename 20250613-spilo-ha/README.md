@@ -61,10 +61,18 @@ mv server.key server.pem.key
 mv server.crt server.pem
 ```
 
+## Create Prometheus Certificate
+```shell
+cd config/certs/prometheus1
+openssl req -newkey rsa:2048 -nodes -subj "/CN=prometheus1" -addext "subjectAltName = DNS:prometheus1,DNS:localhost,IP:127.0.0.1" -keyout server.key -out server.csr
+openssl x509 -req -copy_extensions copy -in server.csr -out server.crt -CAcreateserial -CA ../ca/ca.crt -CAkey ../ca/ca.key -days 3600
+rm server.csr ../ca/ca.srl
+```
+
 # Starting Services
 First, we'll start non-postgres related services.
 ```shell
-docker compose up -d etcd1 etcd2 etcd3 minio1 minio2 haproxy
+docker compose up -d etcd1 etcd2 etcd3 minio1 minio2 haproxy prometheus1 prometheus2
 ```
 Then open minio console in your web browser `https://127.0.0.1:9001`, and
 create the bucket. We'll create `iqbal-spilo-backup` in this example.

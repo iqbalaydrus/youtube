@@ -292,6 +292,7 @@ services:
       MINIO_ROOT_PASSWORD: ohc6OhbahC3Oobai
       MINIO_VOLUMES: https://minio{1...2}/mnt/data
       MINIO_STORAGE_CLASS_STANDARD: "EC:1"
+      MINIO_PROMETHEUS_AUTH_TYPE: public
     command:
       - server
       - --certs-dir
@@ -312,11 +313,43 @@ services:
       MINIO_ROOT_PASSWORD: ohc6OhbahC3Oobai
       MINIO_VOLUMES: https://minio{1...2}/mnt/data
       MINIO_STORAGE_CLASS_STANDARD: "EC:1"
+      MINIO_PROMETHEUS_AUTH_TYPE: public
     command:
       - server
       - --certs-dir
       - /etc/ssl/certs
       - --console-address
       - ":9001"
+  prometheus1:
+    image: prom/prometheus:v3.4.1
+    restart: always
+    volumes:
+      - ./config/certs/prometheus1:/etc/ssl/certs
+      - ./config/prometheus:/etc/prom-config
+      - ./data/prometheus1:/prom-data
+      - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - /etc/localtime:/etc/localtime
+    environment:
+      TZ: Asia/Jakarta
+    command:
+      - '--config.file=/etc/prom-config/prometheus.yaml'
+      - '--web.config.file=/etc/prom-config/web.yaml'
+      - '--storage.tsdb.path=/prom-data'
+      - '--storage.tsdb.retention.time=60d'
+  prometheus2:
+    image: prom/prometheus:v3.4.1
+    restart: always
+    volumes:
+      - ./config/certs/prometheus2:/etc/ssl/certs
+      - ./config/prometheus:/etc/prom-config
+      - ./data/prometheus2:/prom-data
+      - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - /etc/localtime:/etc/localtime
+    environment:
+      TZ: Asia/Jakarta
+    command:
+      - '--config.file=/etc/prom-config/prometheus.yaml'
+      - '--web.config.file=/etc/prom-config/web.yaml'
+      - '--storage.tsdb.path=/prom-data'
+      - '--storage.tsdb.retention.time=60d'
 #  grafana:
-#  prometheus:
