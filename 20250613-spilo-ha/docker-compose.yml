@@ -96,6 +96,7 @@ services:
       - ./data/postgres1:/home/postgres/pgdata
       - ./config/certs/postgres1:/etc/ssl/certs
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - ./config/spilo:/spilo_config
       - /etc/localtime:/etc/localtime
     environment:
       TZ: Asia/Jakarta
@@ -120,6 +121,45 @@ services:
       AWS_SECRET_ACCESS_KEY: ohc6OhbahC3Oobai
       AWS_ENDPOINT: https://haproxy:9000
       WALG_S3_CA_CERT_FILE: /etc/ssl/ca.crt
+      PGPASSWORD_SUPERUSER: iecie8Bo7gakair4
+      PGPASSWORD_ADMIN: ioph0Eex6Oogh1Ah
+      PGPASSWORD_STANDBY: aeB8oong0paiv0er
+      PGBOUNCER_CONFIGURATION: |
+        [databases]
+        * =
+        [pgbouncer]
+        pidfile = /run/postgresql/pgbouncer.pid
+        listen_addr = *
+        listen_port = 6432
+        unix_socket_dir = /run/postgresql
+        unix_socket_mode = 0755
+        auth_query = SELECT rolname, rolpassword FROM pg_catalog.set_config('application_name', 'pgbouncer authentication', false) CROSS JOIN pg_catalog.pg_authid WHERE rolname = $1
+        auth_type = hba
+        auth_hba_file = /spilo_config/pg_hba.conf
+        auth_user = postgres
+        auth_file = /spilo_config/userlist.txt
+        client_tls_sslmode = prefer
+        client_tls_key_file = /etc/ssl/certs/server.key
+        client_tls_cert_file = /etc/ssl/certs/server.crt
+        default_pool_size = 75
+        ignore_startup_parameters = extra_float_digits, options
+        max_client_conn = 500
+        pool_mode = transaction
+        server_reset_query = DISCARD ALL
+        stats_users = monitoring
+      SPILO_CONFIGURATION: |
+        postgresql:
+          pg_hba:
+            - local     all          all                       trust
+            - local     replication  standby                   trust
+            - hostssl   replication  standby     all           md5
+            - hostssl   all          +zalandos   127.0.0.1/32  pam
+            - hostssl   all          +zalandos   ::1/128       pam
+            - host      all          all         127.0.0.1/32  md5
+            - host      all          all         ::1/128       md5
+            - hostssl   all          +zalandos   all           pam
+            - hostssl   all          all         all           md5
+            - hostnossl all          all         all           reject
 #  postgres1-exporter:
 #  pgbouncer1-exporter:
   postgres2:
@@ -132,6 +172,7 @@ services:
       - ./data/postgres2:/home/postgres/pgdata
       - ./config/certs/postgres2:/etc/ssl/certs
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - ./config/spilo:/spilo_config
       - /etc/localtime:/etc/localtime
     environment:
       TZ: Asia/Jakarta
@@ -156,9 +197,47 @@ services:
       AWS_SECRET_ACCESS_KEY: ohc6OhbahC3Oobai
       AWS_ENDPOINT: https://haproxy:9000
       WALG_S3_CA_CERT_FILE: /etc/ssl/ca.crt
+      PGPASSWORD_SUPERUSER: iecie8Bo7gakair4
+      PGPASSWORD_ADMIN: ioph0Eex6Oogh1Ah
+      PGPASSWORD_STANDBY: aeB8oong0paiv0er
+      PGBOUNCER_CONFIGURATION: |
+        [databases]
+        * =
+        [pgbouncer]
+        pidfile = /run/postgresql/pgbouncer.pid
+        listen_addr = *
+        listen_port = 6432
+        unix_socket_dir = /run/postgresql
+        unix_socket_mode = 0755
+        auth_query = SELECT rolname, rolpassword FROM pg_catalog.set_config('application_name', 'pgbouncer authentication', false) CROSS JOIN pg_catalog.pg_authid WHERE rolname = $1
+        auth_type = hba
+        auth_hba_file = /spilo_config/pg_hba.conf
+        auth_user = postgres
+        auth_file = /spilo_config/userlist.txt
+        client_tls_sslmode = prefer
+        client_tls_key_file = /etc/ssl/certs/server.key
+        client_tls_cert_file = /etc/ssl/certs/server.crt
+        default_pool_size = 75
+        ignore_startup_parameters = extra_float_digits, options
+        max_client_conn = 500
+        pool_mode = transaction
+        server_reset_query = DISCARD ALL
+        stats_users = monitoring
+      SPILO_CONFIGURATION: |
+        postgresql:
+          pg_hba:
+            - local     all          all                       trust
+            - local     replication  standby                   trust
+            - hostssl   replication  standby     all           md5
+            - hostssl   all          +zalandos   127.0.0.1/32  pam
+            - hostssl   all          +zalandos   ::1/128       pam
+            - host      all          all         127.0.0.1/32  md5
+            - host      all          all         ::1/128       md5
+            - hostssl   all          +zalandos   all           pam
+            - hostssl   all          all         all           md5
+            - hostnossl all          all         all           reject
 #  postgres2-exporter:
 #  pgbouncer2-exporter:
-#  haproxy:
   minio1:
     image: minio/minio:RELEASE.2025-05-24T17-08-30Z
     restart: always

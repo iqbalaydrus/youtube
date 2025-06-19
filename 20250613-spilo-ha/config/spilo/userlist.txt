@@ -1,0 +1,3 @@
+# generate md5 with: md5({password}{user})
+# this example has nohsi1thiediePai as password
+"monitoring" "md536d9da5a2eadd911f79645a04928c34c"
