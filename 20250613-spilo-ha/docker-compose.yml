@@ -160,8 +160,17 @@ services:
             - hostssl   all          +zalandos   all           pam
             - hostssl   all          all         all           md5
             - hostnossl all          all         all           reject
-#  postgres1-exporter:
-#  pgbouncer1-exporter:
+  postgres1-exporter:
+    image: bitnami/postgres-exporter:0.17.1
+    restart: always
+    environment:
+      PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
+      DATA_SOURCE_NAME: "postgresql://postgres:iecie8Bo7gakair4@postgres1:5432/postgres"
+  pgbouncer1-exporter:
+    image: prometheuscommunity/pgbouncer-exporter:v0.11.0
+    restart: always
+    environment:
+      PGBOUNCER_EXPORTER_CONNECTION_STRING: "postgres://monitoring:nohsi1thiediePai@postgres1:6432/pgbouncer"
   postgres2:
     # this public spilo image doesn't have timescaledb community edition
     # to have one, you need to build the image yourself
@@ -236,8 +245,17 @@ services:
             - hostssl   all          +zalandos   all           pam
             - hostssl   all          all         all           md5
             - hostnossl all          all         all           reject
-#  postgres2-exporter:
-#  pgbouncer2-exporter:
+  postgres2-exporter:
+    image: bitnami/postgres-exporter:0.17.1
+    restart: always
+    environment:
+      PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
+      DATA_SOURCE_NAME: "postgresql://postgres:iecie8Bo7gakair4@postgres2:5432/postgres"
+  pgbouncer2-exporter:
+    image: prometheuscommunity/pgbouncer-exporter:v0.11.0
+    restart: always
+    environment:
+      PGBOUNCER_EXPORTER_CONNECTION_STRING: "postgres://monitoring:nohsi1thiediePai@postgres2:6432/pgbouncer"
   minio1:
     image: minio/minio:RELEASE.2025-05-24T17-08-30Z
     restart: always
