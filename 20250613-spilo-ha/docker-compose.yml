@@ -324,6 +324,9 @@ services:
       - /etc/ssl/certs
       - --console-address
       - ":9001"
+  # this kind of prometheus topology is not tested against alerting
+  # you might get duplicate alerts if you're doing
+  # you've been warned
   prometheus1:
     image: prom/prometheus:v3.4.1
     restart: always
