@@ -32,5 +32,4 @@ scrape_configs:
     metrics_path: /minio/v2/metrics/cluster
     static_configs:
       - targets:
-          - "minio1:9000"
-          - "minio2:9000"
+          - "haproxy:9000"

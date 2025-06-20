@@ -99,3 +99,10 @@ psql -h 127.0.0.1 -p 5432 -U postgres -f scripts/grafana.sql
 ```shell
 docker compose up -d grafana1 grafana2
 ```
+
+# Imports Grafana Dashboards
+- etcd: 15308
+- haproxy: 12693
+- minio: 13502
+- pgbouncer: 14022
+- postgres: 9628

@@ -365,14 +365,14 @@ services:
     volumes:
       - ./data/grafana1:/var/lib/grafana
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
-      - ./config/certs/grafana1:/etc/ssl/certs
+      - ./config/certs/grafana1:/etc/ssl/server-certs
       - /etc/localtime:/etc/localtime
     environment:
       TZ: Asia/Jakarta
       GF_SERVER_ROOT_URL: "https://127.0.0.1:3000"
       GF_SERVER_PROTOCOL: https
-      GF_SERVER_CERT_FILE: /etc/ssl/certs/server.crt
-      GF_SERVER_CERT_KEY: /etc/ssl/certs/server.key
+      GF_SERVER_CERT_FILE: /etc/ssl/server-certs/server.crt
+      GF_SERVER_CERT_KEY: /etc/ssl/server-certs/server.key
       GF_DATABASE_TYPE: postgres
       GF_DATABASE_URL: postgres://grafana:uikaeFaiT1vaijee@haproxy:6432/grafana?binary_parameters=yes
       GF_DATABASE_CA_CERT_PATH: /etc/ssl/ca.crt
@@ -385,14 +385,14 @@ services:
     volumes:
       - ./data/grafana2:/var/lib/grafana
       - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
-      - ./config/certs/grafana2:/etc/ssl/certs
+      - ./config/certs/grafana2:/etc/ssl/server-certs
       - /etc/localtime:/etc/localtime
     environment:
       TZ: Asia/Jakarta
       GF_SERVER_ROOT_URL: "https://127.0.0.1:3000"
       GF_SERVER_PROTOCOL: https
-      GF_SERVER_CERT_FILE: /etc/ssl/certs/server.crt
-      GF_SERVER_CERT_KEY: /etc/ssl/certs/server.key
+      GF_SERVER_CERT_FILE: /etc/ssl/server-certs/server.crt
+      GF_SERVER_CERT_KEY: /etc/ssl/server-certs/server.key
       GF_DATABASE_TYPE: postgres
       GF_DATABASE_URL: postgres://grafana:uikaeFaiT1vaijee@haproxy:6432/grafana?binary_parameters=yes
       GF_DATABASE_CA_CERT_PATH: /etc/ssl/ca.crt
