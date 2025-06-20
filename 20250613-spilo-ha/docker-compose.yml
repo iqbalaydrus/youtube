@@ -4,9 +4,10 @@ services:
     restart: always
     user: root
     ports:
+      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:5432:5432"
       - "127.0.0.1:7000:7000"
       - "127.0.0.1:9001:9001"
-      - "127.0.0.1:9000:9000"
       - "127.0.0.1:9090:9090"
     volumes:
       - ./config/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
@@ -150,6 +151,7 @@ services:
         pool_mode = transaction
         server_reset_query = DISCARD ALL
         stats_users = monitoring
+        max_prepared_statements = 100
       SPILO_CONFIGURATION: |
         bootstrap:
           dcs:
@@ -246,6 +248,7 @@ services:
         pool_mode = transaction
         server_reset_query = DISCARD ALL
         stats_users = monitoring
+        max_prepared_statements = 100
       SPILO_CONFIGURATION: |
         bootstrap:
           dcs:
@@ -353,4 +356,43 @@ services:
       - '--web.config.file=/etc/prom-config/web.yaml'
       - '--storage.tsdb.path=/prom-data'
       - '--storage.tsdb.retention.time=60d'
-#  grafana:
+  grafana1:
+    image: grafana/grafana:12.0.2
+    restart: always
+    volumes:
+      - ./data/grafana1:/var/lib/grafana
+      - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - ./config/certs/grafana1:/etc/ssl/certs
+      - /etc/localtime:/etc/localtime
+    environment:
+      TZ: Asia/Jakarta
+      GF_SERVER_ROOT_URL: "https://127.0.0.1:3000"
+      GF_SERVER_PROTOCOL: https
+      GF_SERVER_CERT_FILE: /etc/ssl/certs/server.crt
+      GF_SERVER_CERT_KEY: /etc/ssl/certs/server.key
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_URL: postgres://grafana:uikaeFaiT1vaijee@haproxy:6432/grafana?binary_parameters=yes
+      GF_DATABASE_CA_CERT_PATH: /etc/ssl/ca.crt
+      GF_DATABASE_SSL_MODE: verify-full
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: "quekecohJie0shoo"
+  grafana2:
+    image: grafana/grafana:12.0.2
+    restart: always
+    volumes:
+      - ./data/grafana2:/var/lib/grafana
+      - ./config/certs/ca/ca.crt:/etc/ssl/ca.crt
+      - ./config/certs/grafana2:/etc/ssl/certs
+      - /etc/localtime:/etc/localtime
+    environment:
+      TZ: Asia/Jakarta
+      GF_SERVER_ROOT_URL: "https://127.0.0.1:3000"
+      GF_SERVER_PROTOCOL: https
+      GF_SERVER_CERT_FILE: /etc/ssl/certs/server.crt
+      GF_SERVER_CERT_KEY: /etc/ssl/certs/server.key
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_URL: postgres://grafana:uikaeFaiT1vaijee@haproxy:6432/grafana?binary_parameters=yes
+      GF_DATABASE_CA_CERT_PATH: /etc/ssl/ca.crt
+      GF_DATABASE_SSL_MODE: verify-full
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: "quekecohJie0shoo"

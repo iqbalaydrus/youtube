@@ -36,7 +36,7 @@ rm server.csr ../ca/ca.srl
 Also do this for each server.
 ```shell
 cd config/certs/postgres1
-openssl req -newkey rsa:2048 -nodes -subj "/CN=postgres1" -addext "subjectAltName = DNS:postgres1,DNS:localhost,IP:127.0.0.1" -keyout server.key -out server.csr
+openssl req -newkey rsa:2048 -nodes -subj "/CN=postgres1" -addext "subjectAltName = DNS:postgres1,DNS:haproxy,DNS:localhost,IP:127.0.0.1" -keyout server.key -out server.csr
 openssl x509 -req -copy_extensions copy -in server.csr -out server.crt -CAcreateserial -CA ../ca/ca.crt -CAkey ../ca/ca.key -days 3600
 rm server.csr ../ca/ca.srl
 ```
@@ -69,6 +69,14 @@ openssl x509 -req -copy_extensions copy -in server.csr -out server.crt -CAcreate
 rm server.csr ../ca/ca.srl
 ```
 
+## Create Grafana Certificate
+```shell
+cd config/certs/grafana1
+openssl req -newkey rsa:2048 -nodes -subj "/CN=grafana1" -addext "subjectAltName = DNS:grafana1,DNS:localhost,IP:127.0.0.1" -keyout server.key -out server.csr
+openssl x509 -req -copy_extensions copy -in server.csr -out server.crt -CAcreateserial -CA ../ca/ca.crt -CAkey ../ca/ca.key -days 3600
+rm server.csr ../ca/ca.srl
+```
+
 # Starting Services
 First, we'll start non-postgres related services.
 ```shell
@@ -79,4 +87,15 @@ create the bucket. We'll create `iqbal-spilo-backup` in this example.
 Then start postgres services.
 ```shell
 docker compose up -d postgres1 postgres1-exporter pgbouncer1-exporter postgres2 postgres2-exporter pgbouncer2-exporter
+```
+
+# Creating Grafana Database and User
+Execute this on your computer.
+```shell
+psql -h 127.0.0.1 -p 5432 -U postgres -f scripts/grafana.sql
+```
+
+# Start Grafana Services
+```shell
+docker compose up -d grafana1 grafana2
 ```
