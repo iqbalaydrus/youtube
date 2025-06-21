@@ -324,9 +324,6 @@ services:
       - /etc/ssl/certs
       - --console-address
       - ":9001"
-  # this kind of prometheus topology is not tested against alerting
-  # you might get duplicate alerts if you're doing
-  # you've been warned
   prometheus1:
     image: prom/prometheus:v3.4.1
     restart: always
@@ -379,6 +376,7 @@ services:
       GF_DATABASE_SSL_MODE: verify-full
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: "quekecohJie0shoo"
+      GF_UNIFIED_ALERTING_HA_PEERS: grafana1:9094,grafana2:9094
   grafana2:
     image: grafana/grafana:12.0.2
     restart: always
@@ -399,3 +397,4 @@ services:
       GF_DATABASE_SSL_MODE: verify-full
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: "quekecohJie0shoo"
+      GF_UNIFIED_ALERTING_HA_PEERS: grafana1:9094,grafana2:9094
